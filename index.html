@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Travel App 6.1</title>
+    <title>My Travel App 7.0</title>
     <style>
         :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --danger-color: #ff4d4f; }
         body { margin: 0; padding: 0; font-family: "PingFang TC", "Noto Sans TC", sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; }
@@ -15,22 +15,8 @@
         .trip-info h2 { margin: 0 0 8px 0; font-size: 1.3rem; }
         .trip-info p { margin: 0; color: #888; font-size: 0.85rem; font-weight: bold; }
         
-        /* 極簡風刪除按鈕樣式 */
-        .delete-btn {
-            color: #d1c9c0; 
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: color 0.2s, transform 0.1s;
-        }
-        .delete-btn:active {
-            color: var(--danger-color); 
-            transform: scale(0.9); 
-        }
+        .delete-btn { color: #d1c9c0; background: none; border: none; cursor: pointer; padding: 8px; display: flex; align-items: center; justify-content: center; transition: color 0.2s, transform 0.1s; }
+        .delete-btn:active { color: var(--danger-color); transform: scale(0.9); }
         
         .fab { position: fixed; bottom: 30px; right: 20px; width: 60px; height: 60px; background: var(--accent-color); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 2rem; box-shadow: 0 4px 15px rgba(140, 123, 108, 0.4); z-index: 100; cursor: pointer;}
         #add-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: flex-end; }
@@ -62,14 +48,13 @@
         .input-group input, .input-group select { flex: 1; padding: 12px; border: 1px solid var(--light-gray); border-radius: 8px; font-size: 1rem; }
         button.add-btn { background-color: var(--accent-color); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         
-        /* 列表樣式 (購物/行李) */
         .list-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f9f9f9; }
         .list-item input[type="checkbox"] { margin-right: 12px; transform: scale(1.3); accent-color: var(--accent-color); }
         .item-text-container { flex-grow: 1; display: flex; align-items: center; }
         .item-name { font-weight: bold; font-size: 0.95rem; transition: color 0.2s; }
         .checked-text { text-decoration: line-through; color: #bbb; }
 
-        /* 記帳頁面特有 */
+        /* 記帳頁面 */
         .expense-total { text-align: center; font-size: 2rem; font-weight: bold; color: var(--accent-color); margin: 10px 0; }
         .expense-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed #eee; }
         .exp-cat { font-size: 0.75rem; background: var(--tab-bg); padding: 2px 6px; border-radius: 4px; margin-right: 8px; color: var(--accent-color); }
@@ -90,17 +75,18 @@
         .weather-temp { font-size: 1.1rem; font-weight: bold; color: var(--accent-color); margin-top: 4px; }
         .weather-loc { font-size: 0.65rem; color: #aaa; }
 
-        .day-content { display: none; }
-        .day-content.active { display: block; animation: fadeIn 0.3s; }
         .timeline-card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #f0f0f0; display: flex; gap: 15px; }
         .time-col { min-width: 65px; text-align: right; }
         .time-col .time { font-size: 0.9rem; font-weight: bold; }
         .event-col { border-left: 2px solid var(--accent-color); padding-left: 15px; position: relative; flex-grow: 1; }
         .event-col::before { content: ''; width: 8px; height: 8px; background: var(--accent-color); border-radius: 50%; position: absolute; left: -5px; top: 5px; }
         .event-title { font-size: 1rem; font-weight: bold; margin: 0 0 5px 0; }
-        
         .map-link-btn { display: inline-block; font-size: 0.8rem; color: #1a73e8; text-decoration: none; background: #f1f3f4; padding: 4px 8px; border-radius: 8px; margin-top: 5px; font-weight: bold; }
         
+        /* 住宿工具特別樣式 */
+        .hotel-gmail-btn { display: flex; justify-content: center; align-items: center; background: #e8f0fe; color: #1a73e8; padding: 12px; border-radius: 10px; text-decoration: none; font-size: 0.95rem; font-weight: bold; margin-top: 15px; transition: background 0.2s; }
+        .hotel-gmail-btn:active { background: #d2e3fc; }
+
         [contenteditable="true"] { border-bottom: 1px dashed #ccc; }
         [contenteditable="true"]:focus { background-color: #f0eadd; outline: none; }
     </style>
@@ -109,8 +95,7 @@
 
 <div id="index-page">
     <h1 class="page-title">✈️ My Journeys</h1>
-    <div id="trip-list">
-        </div>
+    <div id="trip-list"></div>
     <div class="fab" onclick="document.getElementById('add-modal').style.display='flex'">+</div>
 </div>
 
@@ -123,7 +108,7 @@
             <input type="text" id="new-dest" placeholder="輸入你想去哪裡...">
         </div>
         <div class="input-group-modal">
-            <label>出發日期 (用於計算每日日期與天氣)</label>
+            <label>出發日期</label>
             <input type="date" id="new-start-date">
         </div>
         <button class="btn-manual" onclick="createNewTrip()">建立行程</button>
@@ -140,9 +125,7 @@
     </header>
 
     <div id="tab-itinerary" class="main-tab-content active" style="padding-top:0;">
-        <div class="date-tabs" id="dynamic-date-tabs">
-            </div>
-
+        <div class="date-tabs" id="dynamic-date-tabs"></div>
         <div class="daily-board">
             <div class="board-left">
                 <h2 id="board-date">Day 1</h2>
@@ -154,7 +137,6 @@
                 <div class="weather-loc">當地天氣</div>
             </div>
         </div>
-
         <div id="itinerary-list"></div>
     </div>
 
@@ -164,7 +146,6 @@
             <div style="font-size: 0.85rem; color: #888;">目前總花費 (預估台幣)</div>
             <div class="expense-total">NT$ <span id="total-twd">0</span></div>
         </div>
-        
         <div class="input-group">
             <select id="exp-cat" style="flex: 0.5;">
                 <option value="🍽️ 餐飲">餐飲</option>
@@ -178,7 +159,6 @@
             <input type="number" id="exp-amount" placeholder="輸入當地金額...">
             <button class="add-btn" onclick="addExpense()">新增</button>
         </div>
-
         <div class="card" id="expense-list-container"></div>
     </div>
 
@@ -193,8 +173,20 @@
 
     <div id="tab-tools" class="main-tab-content">
         <h3 class="section-title">🧰 旅行助手</h3>
+        
         <div class="card">
-            <strong style="color: var(--accent-color);">💰 匯率計算機</strong>
+            <strong style="color: var(--accent-color); font-size: 1.1rem;">🏨 住宿資訊</strong>
+            <div style="margin-top: 15px;">
+                <div style="font-size: 0.85rem; color: #888;">飯店地址 / 名稱 (點擊可修改)</div>
+                <div contenteditable="true" style="font-weight: bold; margin-top: 5px; line-height: 1.4; color: var(--text-color);" id="hotel-address">127 E 30th St, New York, NY 10016</div>
+            </div>
+            <a href="#" onclick="openGmailSearch()" class="hotel-gmail-btn">
+                <span>📧 一鍵搜尋 Gmail 訂房確認信</span>
+            </a>
+        </div>
+
+        <div class="card">
+            <strong style="color: var(--accent-color); font-size: 1.1rem;">💰 匯率計算機</strong>
             <div style="display: flex; align-items: center; border-bottom: 2px solid var(--accent-color); padding-bottom: 5px; margin: 15px 0;">
                 <span style="font-size: 1.2rem; margin-right: 10px;">$</span>
                 <input type="number" id="usd-input" placeholder="輸入當地金額..." oninput="calcExchange()" style="border:none; outline:none; font-size:1.2rem; width:100%;">
@@ -222,26 +214,56 @@
 </div>
 
 <script>
-    /* =========================================
-       SVG 圖示與動態資料庫 
-    ========================================= */
     // 極簡 SVG 垃圾桶圖示
     const trashIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
 
     let weatherForecast = []; 
     let currentDates = [];
     
+    // 客製化紐約深度行程 (5天)
+    const nycItinerary = {
+        1: [
+            { time: '21:53', title: '✈️ 航班起飛 (HA 6651)', loc: 'San Francisco (SFO)' }
+        ],
+        2: [
+            { time: '06:30', title: '🛬 抵達紐華克機場', loc: 'Newark (EWR)' },
+            { time: '08:30', title: '🏨 抵達飯店寄放行李', loc: '127 E 30th St' },
+            { time: '09:30', title: '☕ 早晨咖啡：Stumptown Coffee', loc: 'Stumptown Coffee Roasters' },
+            { time: '11:00', title: '🌳 麥迪遜廣場公園散步', loc: 'Madison Square Park' },
+            { time: '13:00', title: '🏛️ 911 紀念博物館', loc: '180 Greenwich St' },
+            { time: '17:30', title: '🍝 晚餐：Tony\'s Di Napoli (已訂位)', loc: '147 W 43rd St' }
+        ],
+        3: [
+            { time: '09:30', title: '☕ 絕美復古咖啡廳：Ralph\'s Coffee', loc: '888 Madison Ave' },
+            { time: '10:30', title: '🎨 大都會美術館 (The MET)', loc: '1000 5th Ave' },
+            { time: '14:00', title: '🌳 中央公園悠閒漫步', loc: 'Central Park' },
+            { time: '16:00', title: '🛍️ 第五大道逛街', loc: '5th Ave' },
+            { time: '19:00', title: '🎭 音樂劇：The Great Gatsby', loc: 'Broadway Theatre' }
+        ],
+        4: [
+            { time: '10:00', title: '☕ 溫室綠意咖啡：Devocion', loc: 'Devocion Flatiron' },
+            { time: '11:30', title: '🚶 高線公園 (High Line)', loc: 'The High Line' },
+            { time: '13:00', title: '🦞 雀兒喜市場 (Chelsea Market)', loc: 'Chelsea Market' },
+            { time: '16:00', title: '🌇 探索西村 (West Village)', loc: 'West Village' }
+        ],
+        5: [
+            { time: '10:00', title: '🥯 經典紐約貝果早餐', loc: 'Ess-a-Bagel' },
+            { time: '11:30', title: '🌉 布魯克林大橋打卡', loc: 'Brooklyn Bridge' },
+            { time: '14:30', title: '🧳 返回飯店拿行李出發', loc: '127 E 30th St' },
+            { time: '18:23', title: '✈️ 班機回程 (AS 293)', loc: 'Newark (EWR)' }
+        ]
+    };
+
     let appData = {
         trips: [
             { id: 1, title: '🇺🇸 紐約 (New York)', startDate: '2026-04-20', isDefault: true }
         ],
         shopping: [
-            { id: 1, text: '紐約任天堂皮卡丘限定玩偶', checked: false },
-            { id: 2, text: 'Ricoh GR III 備用電池', checked: false }
+            { id: 1, text: '紐約任天堂皮卡丘限定玩偶', checked: false }
         ],
         packing: [
             { id: 1, text: '護照與個人證件', checked: false },
-            { id: 2, text: '轉接頭與充電線', checked: false }
+            { id: 2, text: 'Ricoh GR III 與備用電池', checked: false }
         ],
         expenses: []
     };
@@ -268,7 +290,6 @@
     function createNewTrip() {
         const dest = document.getElementById('new-dest').value || '未命名旅程';
         const dateStr = document.getElementById('new-start-date').value || new Date().toISOString().split('T')[0];
-        
         appData.trips.push({ title: `📍 ${dest}`, startDate: dateStr, isDefault: false });
         renderTrips();
         document.getElementById('add-modal').style.display = 'none';
@@ -277,7 +298,7 @@
     }
 
     function deleteTrip(index, event) {
-        event.stopPropagation(); // 防止點擊刪除時觸發進入行程
+        event.stopPropagation();
         if(confirm("確定要刪除這趟旅程嗎？")) {
             appData.trips.splice(index, 1);
             renderTrips();
@@ -331,7 +352,6 @@
                 </div>
             `;
         }
-        // 預設切換到 D1
         switchDate(1, tabsContainer.children[0]);
     }
 
@@ -340,7 +360,15 @@
         if(element) element.classList.add('active');
         
         document.getElementById('board-date').innerText = `Day ${dayNum} (${currentDates[dayNum-1]})`;
-        document.getElementById('board-summary').innerText = dayNum === 1 ? '準備出發' : '自由探索';
+        
+        // 判斷是否為紐約，設定對應的標題
+        const isNYC = document.getElementById('top-title').innerText.includes('紐約');
+        if(isNYC) {
+            const summaries = ['啟程飛往美東', '抵達紐約 & 市區觀光', '藝術巡禮 & 音樂劇', '西區綠意探索', '賦歸舊金山'];
+            document.getElementById('board-summary').innerText = summaries[dayNum-1];
+        } else {
+            document.getElementById('board-summary').innerText = dayNum === 1 ? '準備出發' : '自由探索';
+        }
         
         // 更新對應天氣
         if(weatherForecast.length >= dayNum) {
@@ -352,22 +380,49 @@
             document.getElementById('board-icon').innerText = '🌤️';
         }
 
-        // 生成行程內容區塊
+        // 動態載入行程內容
         const container = document.getElementById('itinerary-list');
-        container.innerHTML = `
-            <div class="timeline-card">
-                <div class="time-col"><div class="time" contenteditable="true">09:00</div></div>
-                <div class="event-col">
-                    <div class="event-title" id="event-input-${dayNum}" contenteditable="true">✏️ 點擊輸入景點</div>
-                    <button class="map-link-btn" onclick="searchMap('event-input-${dayNum}')" style="border:none; cursor:pointer;">🗺️ Google Maps 導航</button>
+        container.innerHTML = '';
+        
+        let dayEvents = [];
+        if (isNYC && nycItinerary[dayNum]) {
+            dayEvents = nycItinerary[dayNum];
+        } else {
+            // 空白新增模板
+            dayEvents = [ { time: '09:00', title: '✏️ 點擊輸入景點', loc: '' } ];
+        }
+
+        dayEvents.forEach((ev, idx) => {
+            const evId = `event-${dayNum}-${idx}`;
+            container.innerHTML += `
+                <div class="timeline-card">
+                    <div class="time-col"><div class="time" contenteditable="true">${ev.time}</div></div>
+                    <div class="event-col">
+                        <div class="event-title" id="${evId}" contenteditable="true">${ev.title}</div>
+                        ${ev.loc ? `<div style="font-size: 0.8rem; color: #888; margin-bottom: 5px;" contenteditable="true">${ev.loc}</div>` : ''}
+                        <button class="map-link-btn" onclick="searchMap('${evId}')" style="border:none; cursor:pointer;">🗺️ Google Maps</button>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        });
     }
 
     function searchMap(elementId) {
-        const query = document.getElementById(elementId).innerText;
-        window.open(`https://maps.google.com/?cid=545844908776468405&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQ{encodeURIComponent(query)}`, '_blank');
+        // 自動抓取地名，如果有填 loc 就抓 loc，沒有就抓 title
+        const cardCol = document.getElementById(elementId).parentElement;
+        const locDiv = cardCol.querySelector('div[style*="font-size: 0.8rem"]');
+        let query = locDiv && locDiv.innerText ? locDiv.innerText : document.getElementById(elementId).innerText;
+        // 把表情符號濾掉避免搜尋錯誤
+        query = query.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '').trim(); 
+        window.open(`https://maps.google.com/maps/contrib/107554145592943954296{encodeURIComponent(query)}`, '_blank');
+    }
+
+    // Gmail 自動搜尋按鈕邏輯
+    function openGmailSearch() {
+        const address = document.getElementById('hotel-address').innerText;
+        // 將空格轉為 '+' 號以符合 Gmail 搜尋網址格式
+        const searchStr = address.split(',')[0].replace(/\s+/g, '+');
+        window.open(`https://mail.google.com/mail/u/0/#search/${searchStr}`, '_blank');
     }
 
     /* =========================================
@@ -384,7 +439,6 @@
             if(!geoData.results) throw new Error("找不到城市");
             const {latitude, longitude} = geoData.results[0];
 
-            // 抓取近期天氣預報
             const wxRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto`);
             const wxData = await wxRes.json();
 
@@ -402,18 +456,19 @@
                     icon: icon
                 });
             }
-            // 刷新 D1 天氣顯示
             const activeTab = document.querySelector('.date-tab.active');
-            if(activeTab) switchDate(1, activeTab);
-
+            if(activeTab) {
+                // 從 HTML 中找出 activeTab 是第幾天
+                const dayNumStr = activeTab.querySelector('.day').innerText;
+                switchDate(parseInt(dayNumStr.replace('D','')), activeTab);
+            }
         } catch (e) {
             document.getElementById('board-temp').innerText = '無資料';
-            console.log("Weather API failed");
         }
     }
 
     /* =========================================
-       刪除與新增功能 (記帳/購物/行李)
+       刪除與新增功能
     ========================================= */
     function addExpense() {
         const cat = document.getElementById('exp-cat').value;
