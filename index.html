@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Travel App 7.0</title>
+    <title>My Travel App 7.1</title>
     <style>
         :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --danger-color: #ff4d4f; }
         body { margin: 0; padding: 0; font-family: "PingFang TC", "Noto Sans TC", sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; }
@@ -81,11 +81,11 @@
         .event-col { border-left: 2px solid var(--accent-color); padding-left: 15px; position: relative; flex-grow: 1; }
         .event-col::before { content: ''; width: 8px; height: 8px; background: var(--accent-color); border-radius: 50%; position: absolute; left: -5px; top: 5px; }
         .event-title { font-size: 1rem; font-weight: bold; margin: 0 0 5px 0; }
-        .map-link-btn { display: inline-block; font-size: 0.8rem; color: #1a73e8; text-decoration: none; background: #f1f3f4; padding: 4px 8px; border-radius: 8px; margin-top: 5px; font-weight: bold; }
+        .map-link-btn { display: inline-block; font-size: 0.8rem; color: #1a73e8; text-decoration: none; background: #f1f3f4; padding: 4px 8px; border-radius: 8px; margin-top: 5px; font-weight: bold; cursor: pointer; }
         
         /* 住宿工具特別樣式 */
-        .hotel-gmail-btn { display: flex; justify-content: center; align-items: center; background: #e8f0fe; color: #1a73e8; padding: 12px; border-radius: 10px; text-decoration: none; font-size: 0.95rem; font-weight: bold; margin-top: 15px; transition: background 0.2s; }
-        .hotel-gmail-btn:active { background: #d2e3fc; }
+        .hotel-map-btn { display: flex; justify-content: center; align-items: center; background: #e8f0fe; color: #1a73e8; padding: 12px; border-radius: 10px; text-decoration: none; font-size: 0.95rem; font-weight: bold; margin-top: 15px; transition: background 0.2s; cursor: pointer; border: none; width: 100%; }
+        .hotel-map-btn:active { background: #d2e3fc; }
 
         [contenteditable="true"] { border-bottom: 1px dashed #ccc; }
         [contenteditable="true"]:focus { background-color: #f0eadd; outline: none; }
@@ -180,9 +180,9 @@
                 <div style="font-size: 0.85rem; color: #888;">飯店地址 / 名稱 (點擊可修改)</div>
                 <div contenteditable="true" style="font-weight: bold; margin-top: 5px; line-height: 1.4; color: var(--text-color);" id="hotel-address">127 E 30th St, New York, NY 10016</div>
             </div>
-            <a href="#" onclick="openGmailSearch()" class="hotel-gmail-btn">
-                <span>📧 一鍵搜尋 Gmail 訂房確認信</span>
-            </a>
+            <button onclick="openHotelMap()" class="hotel-map-btn">
+                <span>🗺️ 在 Google Maps 上開啟</span>
+            </button>
         </div>
 
         <div class="card">
@@ -400,29 +400,27 @@
                     <div class="event-col">
                         <div class="event-title" id="${evId}" contenteditable="true">${ev.title}</div>
                         ${ev.loc ? `<div style="font-size: 0.8rem; color: #888; margin-bottom: 5px;" contenteditable="true">${ev.loc}</div>` : ''}
-                        <button class="map-link-btn" onclick="searchMap('${evId}')" style="border:none; cursor:pointer;">🗺️ Google Maps</button>
+                        <button class="map-link-btn" onclick="searchMap('${evId}')">🗺️ Google Maps</button>
                     </div>
                 </div>
             `;
         });
     }
 
+    // 正確的 Google Maps 搜尋器
     function searchMap(elementId) {
-        // 自動抓取地名，如果有填 loc 就抓 loc，沒有就抓 title
         const cardCol = document.getElementById(elementId).parentElement;
         const locDiv = cardCol.querySelector('div[style*="font-size: 0.8rem"]');
         let query = locDiv && locDiv.innerText ? locDiv.innerText : document.getElementById(elementId).innerText;
-        // 把表情符號濾掉避免搜尋錯誤
+        // 濾掉 emoji，確保地圖搜尋精準
         query = query.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '').trim(); 
-        window.open(`https://maps.google.com/maps/contrib/107554145592943954296{encodeURIComponent(query)}`, '_blank');
+        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, '_blank');
     }
 
-    // Gmail 自動搜尋按鈕邏輯
-    function openGmailSearch() {
+    // 住宿資訊 - 直接開啟 Google Maps 
+    function openHotelMap() {
         const address = document.getElementById('hotel-address').innerText;
-        // 將空格轉為 '+' 號以符合 Gmail 搜尋網址格式
-        const searchStr = address.split(',')[0].replace(/\s+/g, '+');
-        window.open(`https://mail.google.com/mail/u/0/#search/${searchStr}`, '_blank');
+        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank');
     }
 
     /* =========================================
@@ -458,7 +456,6 @@
             }
             const activeTab = document.querySelector('.date-tab.active');
             if(activeTab) {
-                // 從 HTML 中找出 activeTab 是第幾天
                 const dayNumStr = activeTab.querySelector('.day').innerText;
                 switchDate(parseInt(dayNumStr.replace('D','')), activeTab);
             }
