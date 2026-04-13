@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Travel App 7.1</title>
+    <title>My Travel App 8.0</title>
     <style>
         :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --danger-color: #ff4d4f; }
         body { margin: 0; padding: 0; font-family: "PingFang TC", "Noto Sans TC", sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; }
@@ -47,6 +47,7 @@
         .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
         .input-group input, .input-group select { flex: 1; padding: 12px; border: 1px solid var(--light-gray); border-radius: 8px; font-size: 1rem; }
         button.add-btn { background-color: var(--accent-color); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        button.add-btn-secondary { background-color: var(--tab-bg); color: var(--accent-color); border: 1px dashed var(--accent-color); padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
         
         .list-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f9f9f9; }
         .list-item input[type="checkbox"] { margin-right: 12px; transform: scale(1.3); accent-color: var(--accent-color); }
@@ -75,19 +76,20 @@
         .weather-temp { font-size: 1.1rem; font-weight: bold; color: var(--accent-color); margin-top: 4px; }
         .weather-loc { font-size: 0.65rem; color: #aaa; }
 
-        .timeline-card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #f0f0f0; display: flex; gap: 15px; }
-        .time-col { min-width: 65px; text-align: right; }
+        .timeline-card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #f0f0f0; display: flex; gap: 15px; position: relative;}
+        .time-col { min-width: 50px; text-align: right; }
         .time-col .time { font-size: 0.9rem; font-weight: bold; }
         .event-col { border-left: 2px solid var(--accent-color); padding-left: 15px; position: relative; flex-grow: 1; }
         .event-col::before { content: ''; width: 8px; height: 8px; background: var(--accent-color); border-radius: 50%; position: absolute; left: -5px; top: 5px; }
         .event-title { font-size: 1rem; font-weight: bold; margin: 0 0 5px 0; }
-        .map-link-btn { display: inline-block; font-size: 0.8rem; color: #1a73e8; text-decoration: none; background: #f1f3f4; padding: 4px 8px; border-radius: 8px; margin-top: 5px; font-weight: bold; cursor: pointer; }
-        
+        .loc-text { font-size: 0.8rem; color: #888; margin-bottom: 5px; }
+        .map-link-btn { display: inline-block; font-size: 0.8rem; color: #1a73e8; text-decoration: none; background: #f1f3f4; padding: 4px 8px; border-radius: 8px; margin-top: 5px; font-weight: bold; cursor: pointer; border: none; }
+        .delete-event-btn { position: absolute; right: 10px; top: 15px; padding: 5px; }
+
         /* 住宿工具特別樣式 */
         .hotel-map-btn { display: flex; justify-content: center; align-items: center; background: #e8f0fe; color: #1a73e8; padding: 12px; border-radius: 10px; text-decoration: none; font-size: 0.95rem; font-weight: bold; margin-top: 15px; transition: background 0.2s; cursor: pointer; border: none; width: 100%; }
-        .hotel-map-btn:active { background: #d2e3fc; }
 
-        [contenteditable="true"] { border-bottom: 1px dashed #ccc; }
+        [contenteditable="true"] { border-bottom: 1px dashed #ccc; min-height: 20px; display: inline-block; width: 100%; }
         [contenteditable="true"]:focus { background-color: #f0eadd; outline: none; }
     </style>
 </head>
@@ -137,7 +139,10 @@
                 <div class="weather-loc">當地天氣</div>
             </div>
         </div>
+        
         <div id="itinerary-list"></div>
+        
+        <button class="add-btn-secondary" onclick="addItineraryEvent()">+ 新增時段</button>
     </div>
 
     <div id="tab-expenses" class="main-tab-content">
@@ -177,8 +182,8 @@
         <div class="card">
             <strong style="color: var(--accent-color); font-size: 1.1rem;">🏨 住宿資訊</strong>
             <div style="margin-top: 15px;">
-                <div style="font-size: 0.85rem; color: #888;">飯店地址 / 名稱 (點擊可修改)</div>
-                <div contenteditable="true" style="font-weight: bold; margin-top: 5px; line-height: 1.4; color: var(--text-color);" id="hotel-address">127 E 30th St, New York, NY 10016</div>
+                <div style="font-size: 0.85rem; color: #888;">飯店地址 / 名稱 (點擊可隨時修改並自動儲存)</div>
+                <div contenteditable="true" style="font-weight: bold; margin-top: 5px; line-height: 1.4; color: var(--text-color);" id="hotel-address" onblur="saveHotelAddress()">127 E 30th St, New York, NY 10016</div>
             </div>
             <button onclick="openHotelMap()" class="hotel-map-btn">
                 <span>🗺️ 在 Google Maps 上開啟</span>
@@ -214,59 +219,70 @@
 </div>
 
 <script>
-    // 極簡 SVG 垃圾桶圖示
     const trashIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
 
     let weatherForecast = []; 
     let currentDates = [];
+    let activeTripTitle = ''; // 紀錄目前開啟的旅程
     
-    // 客製化紐約深度行程 (5天)
-    const nycItinerary = {
-        1: [
-            { time: '21:53', title: '✈️ 航班起飛 (HA 6651)', loc: 'San Francisco (SFO)' }
+    // 預設的資料庫結構
+    let appData = {
+        hotelAddress: "127 E 30th St, New York, NY 10016",
+        trips: [
+            { id: 1, title: '🇺🇸 紐約 (New York)', startDate: '2026-04-20' }
         ],
-        2: [
-            { time: '06:30', title: '🛬 抵達紐華克機場', loc: 'Newark (EWR)' },
-            { time: '08:30', title: '🏨 抵達飯店寄放行李', loc: '127 E 30th St' },
-            { time: '09:30', title: '☕ 早晨咖啡：Stumptown Coffee', loc: 'Stumptown Coffee Roasters' },
-            { time: '11:00', title: '🌳 麥迪遜廣場公園散步', loc: 'Madison Square Park' },
-            { time: '13:00', title: '🏛️ 911 紀念博物館', loc: '180 Greenwich St' },
-            { time: '17:30', title: '🍝 晚餐：Tony\'s Di Napoli (已訂位)', loc: '147 W 43rd St' }
-        ],
-        3: [
-            { time: '09:30', title: '☕ 絕美復古咖啡廳：Ralph\'s Coffee', loc: '888 Madison Ave' },
-            { time: '10:30', title: '🎨 大都會美術館 (The MET)', loc: '1000 5th Ave' },
-            { time: '14:00', title: '🌳 中央公園悠閒漫步', loc: 'Central Park' },
-            { time: '16:00', title: '🛍️ 第五大道逛街', loc: '5th Ave' },
-            { time: '19:00', title: '🎭 音樂劇：The Great Gatsby', loc: 'Broadway Theatre' }
-        ],
-        4: [
-            { time: '10:00', title: '☕ 溫室綠意咖啡：Devocion', loc: 'Devocion Flatiron' },
-            { time: '11:30', title: '🚶 高線公園 (High Line)', loc: 'The High Line' },
-            { time: '13:00', title: '🦞 雀兒喜市場 (Chelsea Market)', loc: 'Chelsea Market' },
-            { time: '16:00', title: '🌇 探索西村 (West Village)', loc: 'West Village' }
-        ],
-        5: [
-            { time: '10:00', title: '🥯 經典紐約貝果早餐', loc: 'Ess-a-Bagel' },
-            { time: '11:30', title: '🌉 布魯克林大橋打卡', loc: 'Brooklyn Bridge' },
-            { time: '14:30', title: '🧳 返回飯店拿行李出發', loc: '127 E 30th St' },
-            { time: '18:23', title: '✈️ 班機回程 (AS 293)', loc: 'Newark (EWR)' }
-        ]
+        shopping: [ { id: 1, text: '紐約任天堂皮卡丘限定玩偶', checked: false } ],
+        packing: [ { id: 1, text: '護照與個人證件', checked: false }, { id: 2, text: 'Ricoh GR III 與備用電池', checked: false } ],
+        expenses: [],
+        itineraries: {} // 存放所有旅程的客製化行程
     };
 
-    let appData = {
-        trips: [
-            { id: 1, title: '🇺🇸 紐約 (New York)', startDate: '2026-04-20', isDefault: true }
-        ],
-        shopping: [
-            { id: 1, text: '紐約任天堂皮卡丘限定玩偶', checked: false }
-        ],
-        packing: [
-            { id: 1, text: '護照與個人證件', checked: false },
-            { id: 2, text: 'Ricoh GR III 與備用電池', checked: false }
-        ],
-        expenses: []
-    };
+    /* =========================================
+       ★★★ 核心：LocalStorage 儲存與讀取 ★★★
+    ========================================= */
+    function saveData() {
+        localStorage.setItem('myTravelApp_V8', JSON.stringify(appData));
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem('myTravelApp_V8');
+        if (saved) {
+            appData = JSON.parse(saved);
+        } else {
+            // 第一次開啟，塞入紐約的預設客製化行程
+            appData.itineraries['🇺🇸 紐約 (New York)'] = {
+                1: [ { time: '21:53', title: '✈️ 航班起飛 (HA 6651)', loc: 'San Francisco (SFO)' } ],
+                2: [
+                    { time: '06:30', title: '🛬 抵達紐華克機場', loc: 'Newark (EWR)' },
+                    { time: '08:30', title: '🏨 抵達飯店寄放行李', loc: '127 E 30th St' },
+                    { time: '09:30', title: '☕ 早晨咖啡：Stumptown Coffee', loc: 'Stumptown Coffee Roasters' },
+                    { time: '11:00', title: '🌳 麥迪遜廣場公園散步', loc: 'Madison Square Park' },
+                    { time: '13:00', title: '🏛️ 911 紀念博物館', loc: '180 Greenwich St' },
+                    { time: '17:30', title: '🍝 晚餐：Tony\'s Di Napoli (已訂位)', loc: '147 W 43rd St' }
+                ],
+                3: [
+                    { time: '09:30', title: '☕ 絕美復古咖啡廳：Ralph\'s Coffee', loc: '888 Madison Ave' },
+                    { time: '10:30', title: '🎨 大都會美術館 (The MET)', loc: '1000 5th Ave' },
+                    { time: '14:00', title: '🌳 中央公園悠閒漫步', loc: 'Central Park' },
+                    { time: '16:00', title: '🛍️ 第五大道逛街', loc: '5th Ave' },
+                    { time: '19:00', title: '🎭 音樂劇：The Great Gatsby', loc: 'Broadway Theatre' }
+                ],
+                4: [
+                    { time: '10:00', title: '☕ 溫室綠意咖啡：Devocion', loc: 'Devocion Flatiron' },
+                    { time: '11:30', title: '🚶 高線公園 (High Line)', loc: 'The High Line' },
+                    { time: '13:00', title: '🦞 雀兒喜市場 (Chelsea Market)', loc: 'Chelsea Market' },
+                    { time: '16:00', title: '🌇 探索西村 (West Village)', loc: 'West Village' }
+                ],
+                5: [
+                    { time: '10:00', title: '🥯 經典紐約貝果早餐', loc: 'Ess-a-Bagel' },
+                    { time: '11:30', title: '🌉 布魯克林大橋打卡', loc: 'Brooklyn Bridge' },
+                    { time: '14:30', title: '🧳 返回飯店拿行李出發', loc: '127 E 30th St' },
+                    { time: '18:23', title: '✈️ 班機回程 (AS 293)', loc: 'Newark (EWR)' }
+                ]
+            };
+            saveData();
+        }
+    }
 
     /* =========================================
        首頁與旅程管理
@@ -290,7 +306,13 @@
     function createNewTrip() {
         const dest = document.getElementById('new-dest').value || '未命名旅程';
         const dateStr = document.getElementById('new-start-date').value || new Date().toISOString().split('T')[0];
-        appData.trips.push({ title: `📍 ${dest}`, startDate: dateStr, isDefault: false });
+        const newTitle = `📍 ${dest}`;
+        appData.trips.push({ title: newTitle, startDate: dateStr });
+        
+        // 預先建立該旅程的空行程表
+        appData.itineraries[newTitle] = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+        
+        saveData(); // 存檔
         renderTrips();
         document.getElementById('add-modal').style.display = 'none';
         document.getElementById('new-dest').value = '';
@@ -300,7 +322,10 @@
     function deleteTrip(index, event) {
         event.stopPropagation();
         if(confirm("確定要刪除這趟旅程嗎？")) {
+            const tripTitle = appData.trips[index].title;
+            delete appData.itineraries[tripTitle]; // 清除關聯行程
             appData.trips.splice(index, 1);
+            saveData(); // 存檔
             renderTrips();
         }
     }
@@ -311,11 +336,13 @@
     }
 
     function openTrip(title, startDate) {
+        activeTripTitle = title;
         document.getElementById('index-page').style.display = 'none';
         document.getElementById('trip-container').style.display = 'block';
         
         document.getElementById('top-title').innerText = title;
         document.getElementById('top-date').innerText = `出發日：${startDate}`;
+        document.getElementById('hotel-address').innerText = appData.hotelAddress || '點擊輸入飯店地址...';
         
         generateDateTabs(startDate);
         fetchWeather(title);
@@ -327,26 +354,69 @@
     }
 
     /* =========================================
-       行程與動態日期頁籤
+       行程編輯與儲存邏輯 (自動存檔)
     ========================================= */
+    function saveCurrentItinerary() {
+        // 掃描畫面上所有的行程卡片，將修改後的文字存回 appData
+        if(!activeTripTitle) return;
+        const activeDayNode = document.querySelector('.date-tab.active .day');
+        if(!activeDayNode) return;
+        
+        const activeDay = activeDayNode.innerText.replace('D', '');
+        const cards = document.querySelectorAll('.timeline-card');
+        
+        let newDayData = [];
+        cards.forEach(card => {
+            newDayData.push({
+                time: card.querySelector('.time').innerText,
+                title: card.querySelector('.event-title').innerText,
+                loc: card.querySelector('.loc-text') ? card.querySelector('.loc-text').innerText : ''
+            });
+        });
+
+        if(!appData.itineraries[activeTripTitle]) appData.itineraries[activeTripTitle] = {};
+        appData.itineraries[activeTripTitle][activeDay] = newDayData;
+        saveData(); // 存檔！
+    }
+
+    function addItineraryEvent() {
+        // 新增一列空白行程
+        if(!activeTripTitle) return;
+        const activeDayNode = document.querySelector('.date-tab.active .day');
+        if(!activeDayNode) return;
+        const activeDay = activeDayNode.innerText.replace('D', '');
+        
+        if(!appData.itineraries[activeTripTitle]) appData.itineraries[activeTripTitle] = {};
+        if(!appData.itineraries[activeTripTitle][activeDay]) appData.itineraries[activeTripTitle][activeDay] = [];
+        
+        appData.itineraries[activeTripTitle][activeDay].push({ time: '12:00', title: '✏️ 點擊修改行程', loc: '📍 點擊修改地點' });
+        saveData();
+        
+        // 重新渲染該天
+        switchDate(activeDay, document.querySelector('.date-tab.active'));
+    }
+
+    function deleteItineraryEvent(dayNum, idx) {
+        if(confirm("確定刪除此行程時段？")) {
+            appData.itineraries[activeTripTitle][dayNum].splice(idx, 1);
+            saveData();
+            switchDate(dayNum, document.querySelector('.date-tab.active'));
+        }
+    }
+
     function generateDateTabs(startDateStr) {
         const tabsContainer = document.getElementById('dynamic-date-tabs');
         tabsContainer.innerHTML = '';
         currentDates = [];
-
         let start = new Date(startDateStr);
         for(let i=0; i<5; i++) {
             let current = new Date(start);
             current.setDate(start.getDate() + i);
-            
-            let mm = String(current.getMonth() + 1).padStart(2, '0');
-            let dd = String(current.getDate()).padStart(2, '0');
-            let displayDate = `${mm}/${dd}`;
+            let displayDate = `${String(current.getMonth() + 1).padStart(2, '0')}/${String(current.getDate()).padStart(2, '0')}`;
             currentDates.push(displayDate);
 
-            let activeClass = i === 0 ? 'active' : '';
             tabsContainer.innerHTML += `
-                <div class="date-tab ${activeClass}" onclick="switchDate(${i+1}, this)">
+                <div class="date-tab ${i === 0 ? 'active' : ''}" onclick="switchDate(${i+1}, this)">
                     <div class="day">D${i+1}</div>
                     <div class="date">${displayDate}</div>
                 </div>
@@ -361,63 +431,51 @@
         
         document.getElementById('board-date').innerText = `Day ${dayNum} (${currentDates[dayNum-1]})`;
         
-        // 判斷是否為紐約，設定對應的標題
-        const isNYC = document.getElementById('top-title').innerText.includes('紐約');
-        if(isNYC) {
-            const summaries = ['啟程飛往美東', '抵達紐約 & 市區觀光', '藝術巡禮 & 音樂劇', '西區綠意探索', '賦歸舊金山'];
-            document.getElementById('board-summary').innerText = summaries[dayNum-1];
-        } else {
-            document.getElementById('board-summary').innerText = dayNum === 1 ? '準備出發' : '自由探索';
-        }
-        
-        // 更新對應天氣
         if(weatherForecast.length >= dayNum) {
             const w = weatherForecast[dayNum-1];
             document.getElementById('board-temp').innerText = `${w.min}°~${w.max}°`;
             document.getElementById('board-icon').innerText = w.icon;
-        } else {
-            document.getElementById('board-temp').innerText = '--°C';
-            document.getElementById('board-icon').innerText = '🌤️';
         }
 
-        // 動態載入行程內容
         const container = document.getElementById('itinerary-list');
         container.innerHTML = '';
         
+        // 從資料庫讀取該天行程
         let dayEvents = [];
-        if (isNYC && nycItinerary[dayNum]) {
-            dayEvents = nycItinerary[dayNum];
-        } else {
-            // 空白新增模板
-            dayEvents = [ { time: '09:00', title: '✏️ 點擊輸入景點', loc: '' } ];
+        if (appData.itineraries[activeTripTitle] && appData.itineraries[activeTripTitle][dayNum]) {
+            dayEvents = appData.itineraries[activeTripTitle][dayNum];
         }
 
         dayEvents.forEach((ev, idx) => {
             const evId = `event-${dayNum}-${idx}`;
+            // 注意：我們在 contenteditable 加上 onblur="saveCurrentItinerary()" 來實現自動存檔
             container.innerHTML += `
                 <div class="timeline-card">
-                    <div class="time-col"><div class="time" contenteditable="true">${ev.time}</div></div>
+                    <div class="time-col"><div class="time" contenteditable="true" onblur="saveCurrentItinerary()">${ev.time}</div></div>
                     <div class="event-col">
-                        <div class="event-title" id="${evId}" contenteditable="true">${ev.title}</div>
-                        ${ev.loc ? `<div style="font-size: 0.8rem; color: #888; margin-bottom: 5px;" contenteditable="true">${ev.loc}</div>` : ''}
+                        <div class="event-title" id="${evId}" contenteditable="true" onblur="saveCurrentItinerary()">${ev.title}</div>
+                        <div class="loc-text" contenteditable="true" onblur="saveCurrentItinerary()">${ev.loc || ''}</div>
                         <button class="map-link-btn" onclick="searchMap('${evId}')">🗺️ Google Maps</button>
                     </div>
+                    <button class="delete-btn delete-event-btn" onclick="deleteItineraryEvent(${dayNum}, ${idx})">${trashIcon}</button>
                 </div>
             `;
         });
     }
 
-    // 正確的 Google Maps 搜尋器
     function searchMap(elementId) {
         const cardCol = document.getElementById(elementId).parentElement;
-        const locDiv = cardCol.querySelector('div[style*="font-size: 0.8rem"]');
-        let query = locDiv && locDiv.innerText ? locDiv.innerText : document.getElementById(elementId).innerText;
-        // 濾掉 emoji，確保地圖搜尋精準
+        const locDiv = cardCol.querySelector('.loc-text');
+        let query = locDiv && locDiv.innerText.trim() ? locDiv.innerText : document.getElementById(elementId).innerText;
         query = query.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '').trim(); 
         window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, '_blank');
     }
 
-    // 住宿資訊 - 直接開啟 Google Maps 
+    function saveHotelAddress() {
+        appData.hotelAddress = document.getElementById('hotel-address').innerText;
+        saveData(); // 存檔
+    }
+
     function openHotelMap() {
         const address = document.getElementById('hotel-address').innerText;
         window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank');
@@ -430,7 +488,6 @@
         try {
             document.getElementById('board-temp').innerText = '查詢中...';
             let searchCity = cityStr.includes('紐約') ? 'New York' : cityStr.replace('📍 ', '');
-            
             const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${searchCity}&count=1`);
             const geoData = await geoRes.json();
             
@@ -447,25 +504,18 @@
                 if(code <= 3) icon = '☀️';
                 else if(code <= 69) icon = '🌧️';
                 else if(code <= 79) icon = '❄️';
-                
-                weatherForecast.push({
-                    max: Math.round(wxData.daily.temperature_2m_max[i]),
-                    min: Math.round(wxData.daily.temperature_2m_min[i]),
-                    icon: icon
-                });
+                weatherForecast.push({ max: Math.round(wxData.daily.temperature_2m_max[i]), min: Math.round(wxData.daily.temperature_2m_min[i]), icon: icon });
             }
             const activeTab = document.querySelector('.date-tab.active');
             if(activeTab) {
                 const dayNumStr = activeTab.querySelector('.day').innerText;
                 switchDate(parseInt(dayNumStr.replace('D','')), activeTab);
             }
-        } catch (e) {
-            document.getElementById('board-temp').innerText = '無資料';
-        }
+        } catch (e) { document.getElementById('board-temp').innerText = '無資料'; }
     }
 
     /* =========================================
-       刪除與新增功能
+       記帳與清單 (自動存檔版)
     ========================================= */
     function addExpense() {
         const cat = document.getElementById('exp-cat').value;
@@ -474,6 +524,8 @@
         if(!name || isNaN(amount)) return alert("請輸入名稱與金額！");
         
         appData.expenses.push({ cat, name, amount });
+        saveData(); // 存檔
+        
         document.getElementById('exp-name').value = '';
         document.getElementById('exp-amount').value = '';
         renderExpenses();
@@ -481,6 +533,7 @@
 
     function deleteExpense(index) {
         appData.expenses.splice(index, 1);
+        saveData(); // 存檔
         renderExpenses();
     }
 
@@ -488,7 +541,6 @@
         const container = document.getElementById('expense-list-container');
         container.innerHTML = '';
         let totalLocal = 0;
-
         appData.expenses.forEach((exp, index) => {
             totalLocal += exp.amount;
             container.innerHTML += `
@@ -506,17 +558,20 @@
         const val = document.getElementById(inputId).value;
         if(!val) return;
         appData[type].push({ id: Date.now(), text: val, checked: false });
+        saveData(); // 存檔
         document.getElementById(inputId).value = '';
         renderLists();
     }
 
     function deleteListObj(type, index) {
         appData[type].splice(index, 1);
+        saveData(); // 存檔
         renderLists();
     }
 
     function toggleCheck(type, index) {
         appData[type][index].checked = !appData[type][index].checked;
+        saveData(); // 存檔
         renderLists();
     }
 
@@ -535,9 +590,6 @@
         });
     }
 
-    /* =========================================
-       UI 輔助功能
-    ========================================= */
     function switchMainTab(tabId, element) {
         document.querySelectorAll('.main-tab-content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -551,7 +603,8 @@
         res.innerText = val ? Math.round(val * 32.2).toLocaleString('en-US') : '0';
     }
 
-    // 初始化渲染首頁
+    // ★ 程式啟動第一步：讀取資料庫
+    loadData();
     renderTrips();
 </script>
 </body>
