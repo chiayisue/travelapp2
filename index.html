@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Travel App 8.0</title>
+    <title>My Travel App 9.0 (Drag & Drop)</title>
     <style>
         :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --danger-color: #ff4d4f; }
         body { margin: 0; padding: 0; font-family: "PingFang TC", "Noto Sans TC", sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; }
@@ -67,6 +67,7 @@
         .date-tab { min-width: 60px; text-align: center; padding: 10px 5px; border-radius: 14px; background: var(--card-bg); border: 1px solid #eee; cursor: pointer; color: #888; display: flex; flex-direction: column; gap: 4px;}
         .date-tab .date { font-size: 0.8rem; }
         .date-tab .day { font-size: 1.1rem; font-weight: bold; }
+        .date-tab .weekday { font-size: 0.7rem; font-weight: normal; margin-top: -2px;} /* 新增星期樣式 */
         .date-tab.active { background: var(--accent-color); color: #fff; box-shadow: 0 4px 10px rgba(140, 123, 108, 0.3); border-color: var(--accent-color); }
         
         .daily-board { padding: 20px; background: var(--card-bg); border-radius: 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border: 1px solid #f0f0f0; }
@@ -76,21 +77,28 @@
         .weather-temp { font-size: 1.1rem; font-weight: bold; color: var(--accent-color); margin-top: 4px; }
         .weather-loc { font-size: 0.65rem; color: #aaa; }
 
-        .timeline-card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #f0f0f0; display: flex; gap: 15px; position: relative;}
+        /* 拖曳樣式設定 */
+        .timeline-card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #f0f0f0; display: flex; gap: 15px; position: relative; cursor: grab; }
+        .timeline-card:active { cursor: grabbing; box-shadow: 0 8px 20px rgba(0,0,0,0.1); transform: scale(1.02); z-index: 10; }
+        .timeline-card.dragging { opacity: 0.5; border: 2px dashed var(--accent-color); }
+        .drag-handle { color: #ccc; display: flex; align-items: center; justify-content: center; padding-right: 5px; }
+        
         .time-col { min-width: 50px; text-align: right; }
-        .time-col .time { font-size: 0.9rem; font-weight: bold; }
+        .time-col .time { font-size: 0.9rem; font-weight: bold; cursor: text; }
         .event-col { border-left: 2px solid var(--accent-color); padding-left: 15px; position: relative; flex-grow: 1; }
         .event-col::before { content: ''; width: 8px; height: 8px; background: var(--accent-color); border-radius: 50%; position: absolute; left: -5px; top: 5px; }
-        .event-title { font-size: 1rem; font-weight: bold; margin: 0 0 5px 0; }
-        .loc-text { font-size: 0.8rem; color: #888; margin-bottom: 5px; }
+        .event-title { font-size: 1rem; font-weight: bold; margin: 0 0 5px 0; cursor: text;}
+        .loc-text { font-size: 0.8rem; color: #888; margin-bottom: 5px; cursor: text;}
         .map-link-btn { display: inline-block; font-size: 0.8rem; color: #1a73e8; text-decoration: none; background: #f1f3f4; padding: 4px 8px; border-radius: 8px; margin-top: 5px; font-weight: bold; cursor: pointer; border: none; }
         .delete-event-btn { position: absolute; right: 10px; top: 15px; padding: 5px; }
 
-        /* 住宿工具特別樣式 */
+        /* 分類清單樣式 */
+        .category-header { font-size: 0.9rem; font-weight: bold; color: var(--accent-color); margin: 15px 0 5px 0; border-bottom: 1px solid var(--light-gray); padding-bottom: 5px; }
+
         .hotel-map-btn { display: flex; justify-content: center; align-items: center; background: #e8f0fe; color: #1a73e8; padding: 12px; border-radius: 10px; text-decoration: none; font-size: 0.95rem; font-weight: bold; margin-top: 15px; transition: background 0.2s; cursor: pointer; border: none; width: 100%; }
 
-        [contenteditable="true"] { border-bottom: 1px dashed #ccc; min-height: 20px; display: inline-block; width: 100%; }
-        [contenteditable="true"]:focus { background-color: #f0eadd; outline: none; }
+        [contenteditable="true"] { border-bottom: 1px dashed transparent; min-height: 20px; display: inline-block; width: 100%; transition: border 0.2s; }
+        [contenteditable="true"]:focus { background-color: #f0eadd; outline: none; border-bottom: 1px dashed var(--accent-color); cursor: text; }
     </style>
 </head>
 <body>
@@ -171,25 +179,21 @@
         <h3 class="section-title">🛒 採買清單</h3>
         <div class="input-group">
             <input type="text" id="shop-input" placeholder="想買什麼？">
-            <button class="add-btn" onclick="addListObj('shopping', 'shop-input')">新增</button>
+            <button class="add-btn" onclick="addListObj('shopping', 'shop-input', '')">新增</button>
         </div>
         <div class="card" style="padding: 5px 15px;" id="shopping-list-container"></div>
     </div>
 
     <div id="tab-tools" class="main-tab-content">
         <h3 class="section-title">🧰 旅行助手</h3>
-        
         <div class="card">
             <strong style="color: var(--accent-color); font-size: 1.1rem;">🏨 住宿資訊</strong>
             <div style="margin-top: 15px;">
-                <div style="font-size: 0.85rem; color: #888;">飯店地址 / 名稱 (點擊可隨時修改並自動儲存)</div>
+                <div style="font-size: 0.85rem; color: #888;">飯店地址 / 名稱 (點擊可修改)</div>
                 <div contenteditable="true" style="font-weight: bold; margin-top: 5px; line-height: 1.4; color: var(--text-color);" id="hotel-address" onblur="saveHotelAddress()">127 E 30th St, New York, NY 10016</div>
             </div>
-            <button onclick="openHotelMap()" class="hotel-map-btn">
-                <span>🗺️ 在 Google Maps 上開啟</span>
-            </button>
+            <button onclick="openHotelMap()" class="hotel-map-btn"><span>🗺️ 在 Google Maps 上開啟</span></button>
         </div>
-
         <div class="card">
             <strong style="color: var(--accent-color); font-size: 1.1rem;">💰 匯率計算機</strong>
             <div style="display: flex; align-items: center; border-bottom: 2px solid var(--accent-color); padding-bottom: 5px; margin: 15px 0;">
@@ -203,9 +207,16 @@
     <div id="tab-packing" class="main-tab-content">
         <h3 class="section-title">🧳 行李清單</h3>
         <div class="input-group">
+            <select id="pack-cat" style="flex: 0.6;">
+                <option value="必備文件">必備文件</option>
+                <option value="電子產品">電子產品</option>
+                <option value="衣物配件">衣物配件</option>
+                <option value="盥洗用品">盥洗用品</option>
+                <option value="其他">其他</option>
+            </select>
             <input type="text" id="pack-input" placeholder="要帶什麼？">
-            <button class="add-btn" onclick="addListObj('packing', 'pack-input')">新增</button>
         </div>
+        <button class="add-btn" style="width: 100%; margin-bottom: 20px;" onclick="addListObj('packing', 'pack-input', 'pack-cat')">新增至分類</button>
         <div class="card" style="padding: 5px 15px;" id="packing-list-container"></div>
     </div>
 
@@ -223,33 +234,31 @@
 
     let weatherForecast = []; 
     let currentDates = [];
-    let activeTripTitle = ''; // 紀錄目前開啟的旅程
+    let currentWeekdays = []; // 儲存星期
+    let activeTripTitle = '';
+    let draggedElement = null; // 用於拖曳
     
-    // 預設的資料庫結構
     let appData = {
         hotelAddress: "127 E 30th St, New York, NY 10016",
-        trips: [
-            { id: 1, title: '🇺🇸 紐約 (New York)', startDate: '2026-04-20' }
-        ],
+        trips: [ { id: 1, title: '🇺🇸 紐約 (New York)', startDate: '2026-04-20' } ],
         shopping: [ { id: 1, text: '紐約任天堂皮卡丘限定玩偶', checked: false } ],
-        packing: [ { id: 1, text: '護照與個人證件', checked: false }, { id: 2, text: 'Ricoh GR III 與備用電池', checked: false } ],
+        packing: [ 
+            { id: 1, text: '護照與個人證件', cat: '必備文件', checked: false }, 
+            { id: 2, text: 'I-20', cat: '必備文件', checked: false },
+            { id: 3, text: 'Ricoh GR III 與備用電池', cat: '電子產品', checked: false } 
+        ],
         expenses: [],
-        itineraries: {} // 存放所有旅程的客製化行程
+        itineraries: {}
     };
 
     /* =========================================
-       ★★★ 核心：LocalStorage 儲存與讀取 ★★★
+       LocalStorage 儲存與讀取
     ========================================= */
-    function saveData() {
-        localStorage.setItem('myTravelApp_V8', JSON.stringify(appData));
-    }
-
+    function saveData() { localStorage.setItem('myTravelApp_V9', JSON.stringify(appData)); }
     function loadData() {
-        const saved = localStorage.getItem('myTravelApp_V8');
-        if (saved) {
-            appData = JSON.parse(saved);
-        } else {
-            // 第一次開啟，塞入紐約的預設客製化行程
+        const saved = localStorage.getItem('myTravelApp_V9');
+        if (saved) { appData = JSON.parse(saved); } 
+        else {
             appData.itineraries['🇺🇸 紐約 (New York)'] = {
                 1: [ { time: '21:53', title: '✈️ 航班起飛 (HA 6651)', loc: 'San Francisco (SFO)' } ],
                 2: [
@@ -308,11 +317,9 @@
         const dateStr = document.getElementById('new-start-date').value || new Date().toISOString().split('T')[0];
         const newTitle = `📍 ${dest}`;
         appData.trips.push({ title: newTitle, startDate: dateStr });
-        
-        // 預先建立該旅程的空行程表
         appData.itineraries[newTitle] = { 1: [], 2: [], 3: [], 4: [], 5: [] };
         
-        saveData(); // 存檔
+        saveData();
         renderTrips();
         document.getElementById('add-modal').style.display = 'none';
         document.getElementById('new-dest').value = '';
@@ -322,10 +329,9 @@
     function deleteTrip(index, event) {
         event.stopPropagation();
         if(confirm("確定要刪除這趟旅程嗎？")) {
-            const tripTitle = appData.trips[index].title;
-            delete appData.itineraries[tripTitle]; // 清除關聯行程
+            delete appData.itineraries[appData.trips[index].title];
             appData.trips.splice(index, 1);
-            saveData(); // 存檔
+            saveData();
             renderTrips();
         }
     }
@@ -354,71 +360,37 @@
     }
 
     /* =========================================
-       行程編輯與儲存邏輯 (自動存檔)
+       行程與動態日期 (時區修正版)
     ========================================= */
-    function saveCurrentItinerary() {
-        // 掃描畫面上所有的行程卡片，將修改後的文字存回 appData
-        if(!activeTripTitle) return;
-        const activeDayNode = document.querySelector('.date-tab.active .day');
-        if(!activeDayNode) return;
-        
-        const activeDay = activeDayNode.innerText.replace('D', '');
-        const cards = document.querySelectorAll('.timeline-card');
-        
-        let newDayData = [];
-        cards.forEach(card => {
-            newDayData.push({
-                time: card.querySelector('.time').innerText,
-                title: card.querySelector('.event-title').innerText,
-                loc: card.querySelector('.loc-text') ? card.querySelector('.loc-text').innerText : ''
-            });
-        });
-
-        if(!appData.itineraries[activeTripTitle]) appData.itineraries[activeTripTitle] = {};
-        appData.itineraries[activeTripTitle][activeDay] = newDayData;
-        saveData(); // 存檔！
-    }
-
-    function addItineraryEvent() {
-        // 新增一列空白行程
-        if(!activeTripTitle) return;
-        const activeDayNode = document.querySelector('.date-tab.active .day');
-        if(!activeDayNode) return;
-        const activeDay = activeDayNode.innerText.replace('D', '');
-        
-        if(!appData.itineraries[activeTripTitle]) appData.itineraries[activeTripTitle] = {};
-        if(!appData.itineraries[activeTripTitle][activeDay]) appData.itineraries[activeTripTitle][activeDay] = [];
-        
-        appData.itineraries[activeTripTitle][activeDay].push({ time: '12:00', title: '✏️ 點擊修改行程', loc: '📍 點擊修改地點' });
-        saveData();
-        
-        // 重新渲染該天
-        switchDate(activeDay, document.querySelector('.date-tab.active'));
-    }
-
-    function deleteItineraryEvent(dayNum, idx) {
-        if(confirm("確定刪除此行程時段？")) {
-            appData.itineraries[activeTripTitle][dayNum].splice(idx, 1);
-            saveData();
-            switchDate(dayNum, document.querySelector('.date-tab.active'));
-        }
-    }
-
     function generateDateTabs(startDateStr) {
         const tabsContainer = document.getElementById('dynamic-date-tabs');
         tabsContainer.innerHTML = '';
         currentDates = [];
-        let start = new Date(startDateStr);
+        currentWeekdays = [];
+        
+        // 解決時區問題：強制將字串解析為當地日期的午夜
+        const parts = startDateStr.split('-');
+        let start = new Date(parts[0], parts[1] - 1, parts[2]); 
+        
+        const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
         for(let i=0; i<5; i++) {
             let current = new Date(start);
             current.setDate(start.getDate() + i);
-            let displayDate = `${String(current.getMonth() + 1).padStart(2, '0')}/${String(current.getDate()).padStart(2, '0')}`;
+            
+            let mm = String(current.getMonth() + 1).padStart(2, '0');
+            let dd = String(current.getDate()).padStart(2, '0');
+            let displayDate = `${mm}/${dd}`;
+            let wd = weekdays[current.getDay()];
+            
             currentDates.push(displayDate);
+            currentWeekdays.push(wd);
 
             tabsContainer.innerHTML += `
                 <div class="date-tab ${i === 0 ? 'active' : ''}" onclick="switchDate(${i+1}, this)">
                     <div class="day">D${i+1}</div>
                     <div class="date">${displayDate}</div>
+                    <div class="weekday">(${wd})</div>
                 </div>
             `;
         }
@@ -430,7 +402,6 @@
         if(element) element.classList.add('active');
         
         document.getElementById('board-date').innerText = `Day ${dayNum} (${currentDates[dayNum-1]})`;
-        
         if(weatherForecast.length >= dayNum) {
             const w = weatherForecast[dayNum-1];
             document.getElementById('board-temp').innerText = `${w.min}°~${w.max}°`;
@@ -440,27 +411,132 @@
         const container = document.getElementById('itinerary-list');
         container.innerHTML = '';
         
-        // 從資料庫讀取該天行程
-        let dayEvents = [];
-        if (appData.itineraries[activeTripTitle] && appData.itineraries[activeTripTitle][dayNum]) {
-            dayEvents = appData.itineraries[activeTripTitle][dayNum];
-        }
+        let dayEvents = appData.itineraries[activeTripTitle] && appData.itineraries[activeTripTitle][dayNum] ? appData.itineraries[activeTripTitle][dayNum] : [];
 
         dayEvents.forEach((ev, idx) => {
             const evId = `event-${dayNum}-${idx}`;
-            // 注意：我們在 contenteditable 加上 onblur="saveCurrentItinerary()" 來實現自動存檔
+            // 加入 draggable 屬性，並設定拖曳相關事件
             container.innerHTML += `
-                <div class="timeline-card">
-                    <div class="time-col"><div class="time" contenteditable="true" onblur="saveCurrentItinerary()">${ev.time}</div></div>
+                <div class="timeline-card" draggable="true" 
+                     ondragstart="dragStart(event)" 
+                     ondragover="dragOver(event)" 
+                     ondragenter="dragEnter(event)" 
+                     ondragleave="dragLeave(event)" 
+                     ondrop="drop(event)" 
+                     data-index="${idx}">
+                    <div class="drag-handle">⋮⋮</div>
+                    <div class="time-col"><div class="time" contenteditable="true" onblur="saveCurrentItinerary()" onclick="preventDragOnEdit(event)">${ev.time}</div></div>
                     <div class="event-col">
-                        <div class="event-title" id="${evId}" contenteditable="true" onblur="saveCurrentItinerary()">${ev.title}</div>
-                        <div class="loc-text" contenteditable="true" onblur="saveCurrentItinerary()">${ev.loc || ''}</div>
+                        <div class="event-title" id="${evId}" contenteditable="true" onblur="saveCurrentItinerary()" onclick="preventDragOnEdit(event)">${ev.title}</div>
+                        <div class="loc-text" contenteditable="true" onblur="saveCurrentItinerary()" onclick="preventDragOnEdit(event)">${ev.loc || ''}</div>
                         <button class="map-link-btn" onclick="searchMap('${evId}')">🗺️ Google Maps</button>
                     </div>
                     <button class="delete-btn delete-event-btn" onclick="deleteItineraryEvent(${dayNum}, ${idx})">${trashIcon}</button>
                 </div>
             `;
         });
+    }
+
+    /* =========================================
+       ★★★ 拖曳 (Drag & Drop) 功能邏輯 ★★★
+    ========================================= */
+    function dragStart(e) {
+        draggedElement = e.currentTarget;
+        e.currentTarget.classList.add('dragging');
+        // 儲存正在拖曳的元素的 index
+        e.dataTransfer.setData('text/plain', e.currentTarget.dataset.index);
+        e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function dragOver(e) {
+        e.preventDefault(); // 必須 preventDefault 才能 drop
+        e.dataTransfer.dropEffect = 'move';
+        return false;
+    }
+
+    function dragEnter(e) {
+        e.preventDefault();
+        const target = e.currentTarget;
+        if(target !== draggedElement) {
+            target.style.borderTop = "2px solid var(--accent-color)";
+        }
+    }
+
+    function dragLeave(e) {
+        e.currentTarget.style.borderTop = "";
+    }
+
+    function drop(e) {
+        e.stopPropagation();
+        const target = e.currentTarget;
+        target.style.borderTop = "";
+        
+        if (draggedElement !== target) {
+            const fromIndex = parseInt(draggedElement.dataset.index);
+            const toIndex = parseInt(target.dataset.index);
+            
+            const activeDayNode = document.querySelector('.date-tab.active .day');
+            const activeDay = activeDayNode.innerText.replace('D', '');
+            
+            // 重新排列陣列資料
+            let events = appData.itineraries[activeTripTitle][activeDay];
+            const [movedEvent] = events.splice(fromIndex, 1);
+            events.splice(toIndex, 0, movedEvent);
+            
+            saveData();
+            switchDate(activeDay, document.querySelector('.date-tab.active'));
+        }
+        return false;
+    }
+
+    // 防止在編輯文字時觸發拖曳
+    function preventDragOnEdit(e) {
+        e.currentTarget.parentElement.parentElement.setAttribute('draggable', false);
+        e.currentTarget.focus();
+        e.currentTarget.onblur = function() {
+            saveCurrentItinerary();
+            this.parentElement.parentElement.setAttribute('draggable', true);
+        };
+    }
+
+    // 行程資料存檔
+    function saveCurrentItinerary() {
+        if(!activeTripTitle) return;
+        const activeDayNode = document.querySelector('.date-tab.active .day');
+        if(!activeDayNode) return;
+        
+        const activeDay = activeDayNode.innerText.replace('D', '');
+        const cards = document.querySelectorAll('.timeline-card');
+        let newDayData = [];
+        cards.forEach(card => {
+            newDayData.push({
+                time: card.querySelector('.time').innerText,
+                title: card.querySelector('.event-title').innerText,
+                loc: card.querySelector('.loc-text') ? card.querySelector('.loc-text').innerText : ''
+            });
+        });
+        appData.itineraries[activeTripTitle][activeDay] = newDayData;
+        saveData();
+    }
+
+    function addItineraryEvent() {
+        if(!activeTripTitle) return;
+        const activeDayNode = document.querySelector('.date-tab.active .day');
+        if(!activeDayNode) return;
+        const activeDay = activeDayNode.innerText.replace('D', '');
+        if(!appData.itineraries[activeTripTitle][activeDay]) appData.itineraries[activeTripTitle][activeDay] = [];
+        
+        appData.itineraries[activeTripTitle][activeDay].push({ time: '12:00', title: '✏️ 點擊修改行程', loc: '📍 點擊修改地點' });
+        saveData();
+        switchDate(activeDay, document.querySelector('.date-tab.active'));
+    }
+
+    function deleteItineraryEvent(dayNum, idx) {
+        if(confirm("確定刪除此行程時段？")) {
+            appData.itineraries[activeTripTitle][dayNum].splice(idx, 1);
+            saveData();
+            switchDate(dayNum, document.querySelector('.date-tab.active'));
+        }
     }
 
     function searchMap(elementId) {
@@ -473,7 +549,7 @@
 
     function saveHotelAddress() {
         appData.hotelAddress = document.getElementById('hotel-address').innerText;
-        saveData(); // 存檔
+        saveData();
     }
 
     function openHotelMap() {
@@ -515,17 +591,15 @@
     }
 
     /* =========================================
-       記帳與清單 (自動存檔版)
+       記帳與清單
     ========================================= */
     function addExpense() {
         const cat = document.getElementById('exp-cat').value;
         const name = document.getElementById('exp-name').value;
         const amount = parseFloat(document.getElementById('exp-amount').value);
         if(!name || isNaN(amount)) return alert("請輸入名稱與金額！");
-        
         appData.expenses.push({ cat, name, amount });
-        saveData(); // 存檔
-        
+        saveData();
         document.getElementById('exp-name').value = '';
         document.getElementById('exp-amount').value = '';
         renderExpenses();
@@ -533,7 +607,7 @@
 
     function deleteExpense(index) {
         appData.expenses.splice(index, 1);
-        saveData(); // 存檔
+        saveData();
         renderExpenses();
     }
 
@@ -554,40 +628,66 @@
         document.getElementById('total-twd').innerText = Math.round(totalLocal * 32.2).toLocaleString('en-US');
     }
 
-    function addListObj(type, inputId) {
+    function addListObj(type, inputId, catId) {
         const val = document.getElementById(inputId).value;
         if(!val) return;
-        appData[type].push({ id: Date.now(), text: val, checked: false });
-        saveData(); // 存檔
+        const cat = catId ? document.getElementById(catId).value : '';
+        appData[type].push({ id: Date.now(), text: val, cat: cat, checked: false });
+        saveData();
         document.getElementById(inputId).value = '';
         renderLists();
     }
 
     function deleteListObj(type, index) {
         appData[type].splice(index, 1);
-        saveData(); // 存檔
+        saveData();
         renderLists();
     }
 
     function toggleCheck(type, index) {
         appData[type][index].checked = !appData[type][index].checked;
-        saveData(); // 存檔
+        saveData();
         renderLists();
     }
 
     function renderLists() {
-        ['shopping', 'packing'].forEach(type => {
-            const container = document.getElementById(`${type}-list-container`);
-            container.innerHTML = appData[type].map((item, index) => `
-                <div class="list-item">
-                    <div class="item-text-container">
-                        <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleCheck('${type}', ${index})">
-                        <span class="item-name ${item.checked ? 'checked-text' : ''}">${item.text}</span>
-                    </div>
-                    <button class="delete-btn" onclick="deleteListObj('${type}', ${index})">${trashIcon}</button>
+        // 渲染購物 (不分類)
+        const shopCont = document.getElementById('shopping-list-container');
+        shopCont.innerHTML = appData.shopping.map((item, i) => `
+            <div class="list-item">
+                <div class="item-text-container">
+                    <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleCheck('shopping', ${i})">
+                    <span class="item-name ${item.checked ? 'checked-text' : ''}">${item.text}</span>
                 </div>
-            `).join('');
+                <button class="delete-btn" onclick="deleteListObj('shopping', ${i})">${trashIcon}</button>
+            </div>
+        `).join('');
+
+        // 渲染行李 (以分類呈現)
+        const packCont = document.getElementById('packing-list-container');
+        packCont.innerHTML = '';
+        const packGroups = {};
+        appData.packing.forEach((item, index) => {
+            if(!packGroups[item.cat]) packGroups[item.cat] = [];
+            item.originalIndex = index; // 記住原本的 index 用於刪除
+            packGroups[item.cat].push(item);
         });
+
+        for (const [catName, items] of Object.entries(packGroups)) {
+            let catHtml = `<div class="category-header">${catName}</div>`;
+            items.forEach(item => {
+                catHtml += `
+                    <div class="list-item">
+                        <div class="item-text-container">
+                            <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleCheck('packing', ${item.originalIndex})">
+                            <span class="item-name ${item.checked ? 'checked-text' : ''}">${item.text}</span>
+                        </div>
+                        <button class="delete-btn" onclick="deleteListObj('packing', ${item.originalIndex})">${trashIcon}</button>
+                    </div>
+                `;
+            });
+            packCont.innerHTML += catHtml;
+        }
     }
 
     function switchMainTab(tabId, element) {
@@ -603,7 +703,7 @@
         res.innerText = val ? Math.round(val * 32.2).toLocaleString('en-US') : '0';
     }
 
-    // ★ 程式啟動第一步：讀取資料庫
+    // ★ 初始化
     loadData();
     renderTrips();
 </script>
