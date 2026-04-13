@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Travel App 13.0</title>
+    <title>My Travel App 14.0</title>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
         :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --danger-color: #ff4d4f; }
@@ -104,12 +104,23 @@
             <div style="font-size: 0.8rem; color: #888;">目前總花費 (預估台幣)</div>
             <div style="font-size: 2rem; font-weight: bold; color: var(--accent-color); margin: 10px 0;">NT$ <span id="total-twd">0</span></div>
         </div>
-        <div class="input-group">
-            <select id="exp-cat"><option value="🍽️ 餐飲">餐飲</option><option value="🛍️ 購物">購物</option><option value="🚕 交通">交通</option><option value="🎫 票券">票券</option></select>
-            <input type="text" id="exp-name" placeholder="項目...">
-            <input type="number" id="exp-amount" placeholder="金額...">
+        
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+            <div style="display: flex; gap: 10px;">
+                <select id="exp-cat" style="flex: 0.8; padding: 12px; border-radius: 8px; border: 1px solid var(--light-gray); font-size: 1rem; background: #fff;">
+                    <option value="🍽️ 餐飲">餐飲</option>
+                    <option value="🛍️ 購物">購物</option>
+                    <option value="🚕 交通">交通</option>
+                    <option value="🎫 票券">票券</option>
+                </select>
+                <input type="text" id="exp-name" placeholder="項目名稱..." style="flex: 1.2; padding: 12px; border-radius: 8px; border: 1px solid var(--light-gray); font-size: 1rem;">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <input type="number" id="exp-amount" placeholder="輸入金額..." style="flex: 1.2; padding: 12px; border-radius: 8px; border: 1px solid var(--light-gray); font-size: 1rem;">
+                <button class="add-btn" onclick="addExpense()" style="flex: 0.8;">新增</button>
+            </div>
         </div>
-        <button class="add-btn" style="width:100%; margin-bottom:20px;" onclick="addExpense()">新增支出</button>
+
         <div class="card" id="expense-list-container"></div>
     </div>
     <div id="tab-shopping" class="main-tab-content">
@@ -154,6 +165,7 @@
     const trashIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
     let weatherForecast = [], currentDates = [], activeTripTitle = '', sortableInstance = null;
     let appData = {
+        lastOpenTrip: null, // 14.0 新增：記錄最後開啟的旅程
         hotelAddress: "127 E 30th St, New York, NY 10016",
         trips: [ { id: 1, title: '🇺🇸 紐約 (New York)', startDate: '2026-04-20' } ],
         shopping: [ { id: 1, text: '紐約任天堂皮卡丘限定玩偶', checked: false } ],
@@ -162,12 +174,11 @@
         itineraries: {}
     };
 
-    function saveData() { localStorage.setItem('myTravelApp_V13', JSON.stringify(appData)); }
+    function saveData() { localStorage.setItem('myTravelApp_V14', JSON.stringify(appData)); }
     function loadData() {
-        const saved = localStorage.getItem('myTravelApp_V13');
+        const saved = localStorage.getItem('myTravelApp_V14');
         if (saved) { appData = JSON.parse(saved); } 
         else {
-            // 預設精選行程（含 Bryant Park & Best Bagel）
             appData.itineraries['🇺🇸 紐約 (New York)'] = {
                 1: [ { time: '21:53', title: '✈️ 航班起飛 (HA 6651)', loc: 'San Francisco (SFO)' } ],
                 2: [
@@ -215,23 +226,57 @@
         saveData(); renderTrips(); document.getElementById('add-modal').style.display = 'none';
     }
     function deleteTrip(index, event) { event.stopPropagation(); if(confirm("確定刪除？")) { appData.trips.splice(index, 1); saveData(); renderTrips(); } }
-    function goHome() { document.getElementById('trip-container').style.display = 'none'; document.getElementById('index-page').style.display = 'block'; }
-    function openTrip(title, startDate) {
-        activeTripTitle = title; document.getElementById('index-page').style.display = 'none'; document.getElementById('trip-container').style.display = 'block';
-        document.getElementById('top-title').innerText = title; document.getElementById('top-date').innerText = `出發日：${startDate}`;
-        generateDateTabs(startDate); fetchWeather(title); renderLists(); renderExpenses();
+    
+    // 14.0 回到首頁時清除狀態
+    function goHome() { 
+        appData.lastOpenTrip = null; 
+        saveData();
+        document.getElementById('trip-container').style.display = 'none'; 
+        document.getElementById('index-page').style.display = 'block'; 
     }
+    
+    function openTrip(title, startDate) {
+        activeTripTitle = title; 
+        appData.lastOpenTrip = title; // 14.0 儲存開啟狀態
+        saveData();
+
+        document.getElementById('index-page').style.display = 'none'; 
+        document.getElementById('trip-container').style.display = 'block';
+        document.getElementById('top-title').innerText = title; 
+        document.getElementById('top-date').innerText = `出發日：${startDate}`;
+        
+        generateDateTabs(startDate); 
+        fetchWeather(title); 
+        renderLists(); 
+        renderExpenses();
+    }
+
     function generateDateTabs(startDateStr) {
         const tabsContainer = document.getElementById('dynamic-date-tabs'); tabsContainer.innerHTML = ''; currentDates = [];
         const parts = startDateStr.split('-'), start = new Date(parts[0], parts[1] - 1, parts[2]), weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        
         for(let i=0; i<5; i++) {
             let current = new Date(start); current.setDate(start.getDate() + i);
             let mm = String(current.getMonth() + 1).padStart(2, '0'), dd = String(current.getDate()).padStart(2, '0'), displayDate = `${mm}/${dd}`, wd = weekdays[current.getDay()];
             currentDates.push(displayDate);
-            tabsContainer.innerHTML += `<div class="date-tab ${i === 0 ? 'active' : ''}" onclick="switchDate(${i+1}, this)"><div class="day">D${i+1}</div><div class="date">${displayDate}</div><div class="weekday">(${wd})</div></div>`;
+            tabsContainer.innerHTML += `<div class="date-tab" onclick="switchDate(${i+1}, this)"><div class="day">D${i+1}</div><div class="date">${displayDate}</div><div class="weekday">(${wd})</div></div>`;
         }
-        switchDate(1, tabsContainer.children[0]);
+        
+        // 14.0：自動偵測手機「今天」的日期，決定要開啟哪一個分頁
+        const today = new Date();
+        const tMm = String(today.getMonth() + 1).padStart(2, '0');
+        const tDd = String(today.getDate()).padStart(2, '0');
+        const todayStr = `${tMm}/${tDd}`;
+
+        let targetDay = 1;
+        let foundIdx = currentDates.indexOf(todayStr);
+        if (foundIdx !== -1) {
+            targetDay = foundIdx + 1; // 找到的話就跳轉到那一天
+        }
+        
+        switchDate(targetDay, tabsContainer.children[targetDay - 1]);
     }
+
     function switchDate(dayNum, element) {
         document.querySelectorAll('.date-tab').forEach(t => t.classList.remove('active')); if(element) element.classList.add('active');
         document.getElementById('board-date').innerText = `Day ${dayNum} (${currentDates[dayNum-1]})`;
@@ -298,10 +343,26 @@
             switchDate(parseInt(document.querySelector('.date-tab.active .day').innerText.replace('D','')), document.querySelector('.date-tab.active'));
         } catch (e) {}
     }
+    
+    // 14.0 修復輸入框不清空的問題
     function addExpense() {
-        const cat = document.getElementById('exp-cat').value, name = document.getElementById('exp-name').value, amt = parseFloat(document.getElementById('exp-amount').value);
-        if(!name || isNaN(amt)) return; appData.expenses.push({ cat, name, amt }); saveData(); renderExpenses();
+        const cat = document.getElementById('exp-cat').value;
+        const nameInput = document.getElementById('exp-name');
+        const amtInput = document.getElementById('exp-amount');
+        const name = nameInput.value;
+        const amt = parseFloat(amtInput.value);
+        
+        if(!name || isNaN(amt)) return; 
+        
+        appData.expenses.push({ cat, name, amt }); 
+        saveData(); 
+        renderExpenses();
+        
+        // 成功新增後，將欄位清空
+        nameInput.value = '';
+        amtInput.value = '';
     }
+    
     function renderExpenses() {
         const c = document.getElementById('expense-list-container'); c.innerHTML = ''; let t = 0;
         appData.expenses.forEach((e, i) => { t += e.amt; c.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px dashed #eee;"><div>${e.cat} ${e.name}</div><div>$${e.amt} <button onclick="delExp(${i})" style="border:none; background:none; color:#ccc;">${trashIcon}</button></div></div>`; });
@@ -326,7 +387,18 @@
     function toggleCheck(t, i) { appData[t][i].checked = !appData[t][i].checked; saveData(); renderLists(); }
     function switchMainTab(id, el) { document.querySelectorAll('.main-tab-content').forEach(c => c.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.getElementById(id).classList.add('active'); el.classList.add('active'); }
     function calcExchange() { const v = document.getElementById('usd-input').value; document.getElementById('twd-result').innerText = v ? Math.round(v * 32.2).toLocaleString() : '0'; }
-    loadData(); renderTrips();
+    
+    // 啟動 App
+    loadData(); 
+    renderTrips();
+    
+    // 14.0 自動開啟上次未關閉的旅程
+    if (appData.lastOpenTrip) {
+        const trip = appData.trips.find(t => t.title === appData.lastOpenTrip);
+        if (trip) {
+            openTrip(trip.title, trip.startDate);
+        }
+    }
 </script>
 </body>
 </html>
