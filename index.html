@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Travel App 9.0 (Drag & Drop)</title>
+    <title>My Travel App 10.0</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
     <style>
         :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --danger-color: #ff4d4f; }
-        body { margin: 0; padding: 0; font-family: "PingFang TC", "Noto Sans TC", sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; }
+        body { margin: 0; padding: 0; font-family: "PingFang TC", "Noto Sans TC", sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; overscroll-behavior-y: none; }
         
-        /* 首頁與 Modal */
         #index-page { padding: 20px; display: block; padding-bottom: 100px; animation: fadeIn 0.3s; }
         .page-title { font-size: 1.8rem; margin: 10px 0 20px 0; letter-spacing: 1px; }
         .trip-card { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; cursor: pointer; position: relative; display: flex; justify-content: space-between; align-items: center;}
@@ -27,7 +29,6 @@
         .btn-manual { width: 100%; padding: 14px; background: var(--accent-color); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px;}
         .close-modal { position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 1.5rem; color: #999; }
 
-        /* 內頁容器與導航 */
         #trip-container { display: none; padding-bottom: 90px; }
         .trip-header { padding: 20px 20px 10px 20px; display: flex; justify-content: space-between; align-items: flex-start; position: sticky; top: 0; background-color: var(--bg-color); z-index: 90; }
         .header-info h1 { margin: 0; font-size: 1.4rem; }
@@ -38,7 +39,6 @@
         .nav-item.active { color: var(--accent-color); font-weight: bold; }
         .nav-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
 
-        /* 共用區塊 */
         .main-tab-content { display: none; padding: 0 20px 20px 20px; }
         .main-tab-content.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -55,19 +55,17 @@
         .item-name { font-weight: bold; font-size: 0.95rem; transition: color 0.2s; }
         .checked-text { text-decoration: line-through; color: #bbb; }
 
-        /* 記帳頁面 */
         .expense-total { text-align: center; font-size: 2rem; font-weight: bold; color: var(--accent-color); margin: 10px 0; }
         .expense-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed #eee; }
         .exp-cat { font-size: 0.75rem; background: var(--tab-bg); padding: 2px 6px; border-radius: 4px; margin-right: 8px; color: var(--accent-color); }
         .exp-details { flex-grow: 1; }
 
-        /* 行程頁面特有 */
         .date-tabs { display: flex; overflow-x: auto; padding: 10px 0; gap: 12px; scrollbar-width: none; margin: 0 -20px; padding-left: 20px; }
         .date-tabs::-webkit-scrollbar { display: none; }
         .date-tab { min-width: 60px; text-align: center; padding: 10px 5px; border-radius: 14px; background: var(--card-bg); border: 1px solid #eee; cursor: pointer; color: #888; display: flex; flex-direction: column; gap: 4px;}
         .date-tab .date { font-size: 0.8rem; }
         .date-tab .day { font-size: 1.1rem; font-weight: bold; }
-        .date-tab .weekday { font-size: 0.7rem; font-weight: normal; margin-top: -2px;} /* 新增星期樣式 */
+        .date-tab .weekday { font-size: 0.7rem; font-weight: normal; margin-top: -2px;} 
         .date-tab.active { background: var(--accent-color); color: #fff; box-shadow: 0 4px 10px rgba(140, 123, 108, 0.3); border-color: var(--accent-color); }
         
         .daily-board { padding: 20px; background: var(--card-bg); border-radius: 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border: 1px solid #f0f0f0; }
@@ -77,11 +75,11 @@
         .weather-temp { font-size: 1.1rem; font-weight: bold; color: var(--accent-color); margin-top: 4px; }
         .weather-loc { font-size: 0.65rem; color: #aaa; }
 
-        /* 拖曳樣式設定 */
-        .timeline-card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #f0f0f0; display: flex; gap: 15px; position: relative; cursor: grab; }
-        .timeline-card:active { cursor: grabbing; box-shadow: 0 8px 20px rgba(0,0,0,0.1); transform: scale(1.02); z-index: 10; }
-        .timeline-card.dragging { opacity: 0.5; border: 2px dashed var(--accent-color); }
-        .drag-handle { color: #ccc; display: flex; align-items: center; justify-content: center; padding-right: 5px; }
+        /* SortableJS 拖曳樣式 */
+        .timeline-card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #f0f0f0; display: flex; gap: 15px; position: relative; }
+        .sortable-ghost { opacity: 0.4; border: 2px dashed var(--accent-color); }
+        .drag-handle { color: #ccc; display: flex; align-items: center; justify-content: center; padding-right: 5px; font-size: 1.5rem; cursor: grab; touch-action: none; }
+        .drag-handle:active { cursor: grabbing; }
         
         .time-col { min-width: 50px; text-align: right; }
         .time-col .time { font-size: 0.9rem; font-weight: bold; cursor: text; }
@@ -92,9 +90,7 @@
         .map-link-btn { display: inline-block; font-size: 0.8rem; color: #1a73e8; text-decoration: none; background: #f1f3f4; padding: 4px 8px; border-radius: 8px; margin-top: 5px; font-weight: bold; cursor: pointer; border: none; }
         .delete-event-btn { position: absolute; right: 10px; top: 15px; padding: 5px; }
 
-        /* 分類清單樣式 */
         .category-header { font-size: 0.9rem; font-weight: bold; color: var(--accent-color); margin: 15px 0 5px 0; border-bottom: 1px solid var(--light-gray); padding-bottom: 5px; }
-
         .hotel-map-btn { display: flex; justify-content: center; align-items: center; background: #e8f0fe; color: #1a73e8; padding: 12px; border-radius: 10px; text-decoration: none; font-size: 0.95rem; font-weight: bold; margin-top: 15px; transition: background 0.2s; cursor: pointer; border: none; width: 100%; }
 
         [contenteditable="true"] { border-bottom: 1px dashed transparent; min-height: 20px; display: inline-block; width: 100%; transition: border 0.2s; }
@@ -234,9 +230,9 @@
 
     let weatherForecast = []; 
     let currentDates = [];
-    let currentWeekdays = []; // 儲存星期
+    let currentWeekdays = []; 
     let activeTripTitle = '';
-    let draggedElement = null; // 用於拖曳
+    let sortableInstance = null;
     
     let appData = {
         hotelAddress: "127 E 30th St, New York, NY 10016",
@@ -251,12 +247,9 @@
         itineraries: {}
     };
 
-    /* =========================================
-       LocalStorage 儲存與讀取
-    ========================================= */
-    function saveData() { localStorage.setItem('myTravelApp_V9', JSON.stringify(appData)); }
+    function saveData() { localStorage.setItem('myTravelApp_V10', JSON.stringify(appData)); }
     function loadData() {
-        const saved = localStorage.getItem('myTravelApp_V9');
+        const saved = localStorage.getItem('myTravelApp_V10');
         if (saved) { appData = JSON.parse(saved); } 
         else {
             appData.itineraries['🇺🇸 紐約 (New York)'] = {
@@ -293,9 +286,6 @@
         }
     }
 
-    /* =========================================
-       首頁與旅程管理
-    ========================================= */
     function renderTrips() {
         const list = document.getElementById('trip-list');
         list.innerHTML = '';
@@ -360,7 +350,7 @@
     }
 
     /* =========================================
-       行程與動態日期 (時區修正版)
+       時區精準校正與星期標示
     ========================================= */
     function generateDateTabs(startDateStr) {
         const tabsContainer = document.getElementById('dynamic-date-tabs');
@@ -368,10 +358,9 @@
         currentDates = [];
         currentWeekdays = [];
         
-        // 解決時區問題：強制將字串解析為當地日期的午夜
+        // 分割字串避免瀏覽器以 UTC 時區解析導致日期倒退
         const parts = startDateStr.split('-');
         let start = new Date(parts[0], parts[1] - 1, parts[2]); 
-        
         const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
         for(let i=0; i<5; i++) {
@@ -415,91 +404,75 @@
 
         dayEvents.forEach((ev, idx) => {
             const evId = `event-${dayNum}-${idx}`;
-            // 加入 draggable 屬性，並設定拖曳相關事件
+            // 移除了原生的 HTML5 draggable 屬性
             container.innerHTML += `
-                <div class="timeline-card" draggable="true" 
-                     ondragstart="dragStart(event)" 
-                     ondragover="dragOver(event)" 
-                     ondragenter="dragEnter(event)" 
-                     ondragleave="dragLeave(event)" 
-                     ondrop="drop(event)" 
-                     data-index="${idx}">
+                <div class="timeline-card" data-index="${idx}">
                     <div class="drag-handle">⋮⋮</div>
-                    <div class="time-col"><div class="time" contenteditable="true" onblur="saveCurrentItinerary()" onclick="preventDragOnEdit(event)">${ev.time}</div></div>
+                    <div class="time-col"><div class="time" contenteditable="true" onblur="saveCurrentItinerary()">${ev.time}</div></div>
                     <div class="event-col">
-                        <div class="event-title" id="${evId}" contenteditable="true" onblur="saveCurrentItinerary()" onclick="preventDragOnEdit(event)">${ev.title}</div>
-                        <div class="loc-text" contenteditable="true" onblur="saveCurrentItinerary()" onclick="preventDragOnEdit(event)">${ev.loc || ''}</div>
+                        <div class="event-title" id="${evId}" contenteditable="true" onblur="saveCurrentItinerary()">${ev.title}</div>
+                        <div class="loc-text" contenteditable="true" onblur="saveCurrentItinerary()">${ev.loc || ''}</div>
                         <button class="map-link-btn" onclick="searchMap('${evId}')">🗺️ Google Maps</button>
                     </div>
                     <button class="delete-btn delete-event-btn" onclick="deleteItineraryEvent(${dayNum}, ${idx})">${trashIcon}</button>
                 </div>
             `;
         });
+
+        // 初始化專業拖曳套件
+        initSortable(dayNum);
     }
 
     /* =========================================
-       ★★★ 拖曳 (Drag & Drop) 功能邏輯 ★★★
+       SortableJS 與 智慧時間推算引擎
     ========================================= */
-    function dragStart(e) {
-        draggedElement = e.currentTarget;
-        e.currentTarget.classList.add('dragging');
-        // 儲存正在拖曳的元素的 index
-        e.dataTransfer.setData('text/plain', e.currentTarget.dataset.index);
-        e.dataTransfer.effectAllowed = 'move';
-    }
-
-    function dragOver(e) {
-        e.preventDefault(); // 必須 preventDefault 才能 drop
-        e.dataTransfer.dropEffect = 'move';
-        return false;
-    }
-
-    function dragEnter(e) {
-        e.preventDefault();
-        const target = e.currentTarget;
-        if(target !== draggedElement) {
-            target.style.borderTop = "2px solid var(--accent-color)";
-        }
-    }
-
-    function dragLeave(e) {
-        e.currentTarget.style.borderTop = "";
-    }
-
-    function drop(e) {
-        e.stopPropagation();
-        const target = e.currentTarget;
-        target.style.borderTop = "";
+    function initSortable(dayNum) {
+        const el = document.getElementById('itinerary-list');
+        if(sortableInstance) { sortableInstance.destroy(); }
         
-        if (draggedElement !== target) {
-            const fromIndex = parseInt(draggedElement.dataset.index);
-            const toIndex = parseInt(target.dataset.index);
-            
-            const activeDayNode = document.querySelector('.date-tab.active .day');
-            const activeDay = activeDayNode.innerText.replace('D', '');
-            
-            // 重新排列陣列資料
-            let events = appData.itineraries[activeTripTitle][activeDay];
-            const [movedEvent] = events.splice(fromIndex, 1);
-            events.splice(toIndex, 0, movedEvent);
-            
-            saveData();
-            switchDate(activeDay, document.querySelector('.date-tab.active'));
+        sortableInstance = new Sortable(el, {
+            handle: '.drag-handle', // 只有按住點點才能拖曳，避免跟文字編輯衝突
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            onEnd: function (evt) {
+                const oldIndex = evt.oldIndex;
+                const newIndex = evt.newIndex;
+                if(oldIndex === newIndex) return;
+
+                let events = appData.itineraries[activeTripTitle][dayNum];
+                const [moved] = events.splice(oldIndex, 1);
+                events.splice(newIndex, 0, moved);
+
+                // 觸發：自動順延時間引擎
+                recalculateTimes(dayNum);
+
+                saveData();
+                switchDate(dayNum, document.querySelector('.date-tab.active'));
+            }
+        });
+    }
+
+    function recalculateTimes(dayNum) {
+        let events = appData.itineraries[activeTripTitle][dayNum];
+        if(events.length <= 1) return;
+
+        // 取第一筆行程的時間當基準
+        let baseStr = events[0].time;
+        let [hrs, mins] = baseStr.split(':').map(Number);
+        
+        // 防呆：如果第一筆沒有正確輸入數字，就不推算
+        if(isNaN(hrs) || isNaN(mins)) return; 
+        
+        let totalMins = hrs * 60 + mins;
+
+        for(let i = 1; i < events.length; i++) {
+            totalMins += 120; // 每個行程自動 +2 小時 (120分鐘)
+            let newH = Math.floor(totalMins / 60) % 24;
+            let newM = totalMins % 60;
+            events[i].time = `${String(newH).padStart(2, '0')}:${String(newM).padStart(2, '0')}`;
         }
-        return false;
     }
 
-    // 防止在編輯文字時觸發拖曳
-    function preventDragOnEdit(e) {
-        e.currentTarget.parentElement.parentElement.setAttribute('draggable', false);
-        e.currentTarget.focus();
-        e.currentTarget.onblur = function() {
-            saveCurrentItinerary();
-            this.parentElement.parentElement.setAttribute('draggable', true);
-        };
-    }
-
-    // 行程資料存檔
     function saveCurrentItinerary() {
         if(!activeTripTitle) return;
         const activeDayNode = document.querySelector('.date-tab.active .day');
@@ -557,9 +530,6 @@
         window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, '_blank');
     }
 
-    /* =========================================
-       天氣 API 串接
-    ========================================= */
     async function fetchWeather(cityStr) {
         try {
             document.getElementById('board-temp').innerText = '查詢中...';
@@ -590,9 +560,6 @@
         } catch (e) { document.getElementById('board-temp').innerText = '無資料'; }
     }
 
-    /* =========================================
-       記帳與清單
-    ========================================= */
     function addExpense() {
         const cat = document.getElementById('exp-cat').value;
         const name = document.getElementById('exp-name').value;
@@ -651,7 +618,6 @@
     }
 
     function renderLists() {
-        // 渲染購物 (不分類)
         const shopCont = document.getElementById('shopping-list-container');
         shopCont.innerHTML = appData.shopping.map((item, i) => `
             <div class="list-item">
@@ -663,13 +629,12 @@
             </div>
         `).join('');
 
-        // 渲染行李 (以分類呈現)
         const packCont = document.getElementById('packing-list-container');
         packCont.innerHTML = '';
         const packGroups = {};
         appData.packing.forEach((item, index) => {
             if(!packGroups[item.cat]) packGroups[item.cat] = [];
-            item.originalIndex = index; // 記住原本的 index 用於刪除
+            item.originalIndex = index; 
             packGroups[item.cat].push(item);
         });
 
@@ -703,7 +668,6 @@
         res.innerText = val ? Math.round(val * 32.2).toLocaleString('en-US') : '0';
     }
 
-    // ★ 初始化
     loadData();
     renderTrips();
 </script>
