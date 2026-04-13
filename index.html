@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Travel App 4.0 (Ultimate Edition)</title>
+    <style>
+        :root {
+            --bg-color: #fdfbf7;
+            --card-bg: #ffffff;
+            --accent-color: #8c7b6c;
+            --text-color: #4a4a4a;
+            --light-gray: #e0e0e0;
+            --tab-bg: #f0eadd;
+            --ai-gradient: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
+        }
+
+        body { margin: 0; padding: 0; font-family: "PingFang TC", "Noto Sans TC", sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; }
+        
+        /* ============== 首頁大廳 (Index Page) ============== */
+        #index-page { padding: 20px; display: block; padding-bottom: 100px; animation: fadeIn 0.3s; }
+        .page-title { font-size: 1.8rem; margin: 10px 0 20px 0; color: var(--text-color); letter-spacing: 1px; }
+        
+        .trip-card { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; cursor: pointer; position: relative; transition: transform 0.2s; }
+        .trip-card:active { transform: scale(0.98); }
+        .trip-card h2 { margin: 0 0 8px 0; font-size: 1.3rem; color: var(--text-color); }
+        .trip-card p { margin: 0; color: #888; font-size: 0.85rem; font-weight: bold; }
+        .trip-card::after { content: '➔'; position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: var(--accent-color); font-size: 1.2rem; }
+
+        /* 浮動新增按鈕 (FAB) */
+        .fab { position: fixed; bottom: 30px; right: 20px; width: 60px; height: 60px; background: var(--accent-color); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 2rem; box-shadow: 0 4px 15px rgba(140, 123, 108, 0.4); cursor: pointer; z-index: 100; transition: transform 0.2s; }
+        .fab:active { transform: scale(0.9); }
+
+        /* ============== 新增行程 Modal ============== */
+        #add-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: flex-end; animation: fadeIn 0.2s; }
+        .modal-content { background: var(--bg-color); width: 100%; border-radius: 24px 24px 0 0; padding: 30px 20px 40px 20px; box-sizing: border-box; transform: translateY(100%); animation: slideUp 0.3s forwards; }
+        @keyframes slideUp { to { transform: translateY(0); } }
+        
+        .modal-title { margin: 0 0 20px 0; font-size: 1.3rem; text-align: center; }
+        .input-group-modal { margin-bottom: 15px; }
+        .input-group-modal label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 5px; font-weight: bold; }
+        .input-group-modal input { width: 100%; padding: 12px; border: 1px solid var(--light-gray); border-radius: 10px; background: #fff; font-size: 1rem; box-sizing: border-box; }
+        
+        .btn-manual { width: 100%; padding: 14px; background: #fff; border: 1px solid var(--accent-color); color: var(--accent-color); border-radius: 12px; font-size: 1rem; font-weight: bold; margin-bottom: 12px; cursor: pointer; }
+        .btn-ai { width: 100%; padding: 14px; background: var(--ai-gradient); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(63, 43, 150, 0.3); }
+        .close-modal { position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 1.5rem; color: #999; cursor: pointer; }
+
+        #ai-loading { display: none; text-align: center; padding: 20px 0; color: #3f2b96; font-weight: bold; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+
+        /* ============== 內頁 (Trip Container) ============== */
+        #trip-container { display: none; padding-bottom: 90px; animation: fadeIn 0.3s; }
+        
+        .trip-header { padding: 20px 20px 10px 20px; display: flex; justify-content: space-between; align-items: flex-start; position: sticky; top: 0; background-color: var(--bg-color); z-index: 90; }
+        .header-info h1 { margin: 0; font-size: 1.4rem; color: var(--text-color); letter-spacing: 1px; }
+        .header-info p { margin: 4px 0 0 0; font-size: 0.8rem; color: #888; font-weight: bold; }
+        .back-btn { background: #fff; border: 1px solid var(--light-gray); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; color: var(--accent-color); cursor: pointer; display: flex; align-items: center; gap: 4px;}
+
+        /* 共用功能樣式 */
+        .main-tab-content { display: none; animation: fadeIn 0.3s; }
+        .main-tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- 行程樣式 --- */
+        .date-tabs { display: flex; overflow-x: auto; padding: 10px 20px; gap: 12px; scrollbar-width: none; }
+        .date-tabs::-webkit-scrollbar { display: none; }
+        .date-tab { min-width: 55px; text-align: center; padding: 10px 5px; border-radius: 14px; background: var(--card-bg); border: 1px solid #eee; cursor: pointer; color: #888; transition: all 0.2s; }
+        .date-tab .date { font-size: 0.8rem; margin-bottom: 3px; }
+        .date-tab .day { font-size: 1.1rem; font-weight: bold; }
+        .date-tab.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); box-shadow: 0 4px 10px rgba(140, 123, 108, 0.3); }
+
+        .daily-board { margin: 15px 20px; padding: 20px; background: var(--card-bg); border-radius: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.04); border: 1px solid #f9f9f9; }
+        .board-left h2 { margin: 0 0 8px 0; font-size: 1.4rem; color: var(--text-color); }
+        .board-left p { margin: 0; font-size: 0.85rem; color: #666; background: var(--tab-bg); padding: 4px 10px; border-radius: 12px; display: inline-block; }
+        .board-right { text-align: right; }
+        .weather-icon { font-size: 1.8rem; line-height: 1; }
+        .weather-temp { font-size: 1.1rem; font-weight: bold; color: var(--accent-color); margin-top: 4px; }
+        .weather-loc { font-size: 0.65rem; color: #aaa; }
+
+        .day-content { display: none; padding: 0 20px; }
+        .day-content.active { display: block; animation: fadeIn 0.3s; }
+        .timeline-card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #f0f0f0; display: flex; gap: 15px; }
+        .time-col { min-width: 65px; text-align: right; }
+        .time-col .time { font-size: 0.9rem; font-weight: bold; color: var(--text-color); }
+        .time-col .period { font-size: 0.7rem; color: #888; }
+        .event-col { border-left: 2px solid var(--accent-color); padding-left: 15px; position: relative; flex-grow: 1; }
+        .event-col::before { content: ''; width: 8px; height: 8px; background: var(--accent-color); border-radius: 50%; position: absolute; left: -5px; top: 5px; }
+        .event-title { font-size: 1rem; font-weight: bold; margin: 0 0 5px 0; color: var(--text-color); }
+        .event-addr { font-size: 0.75rem; color: #888; display: flex; align-items: center; gap: 4px; }
+
+        /* --- 其他分頁樣式 --- */
+        .page-content { padding: 0 20px 20px 20px; }
+        .section-title { font-size: 1.2rem; margin: 10px 0 15px 0; color: var(--accent-color); font-weight: bold; }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 18px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; }
+        
+        .list-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f9f9f9; }
+        .list-item input[type="checkbox"] { margin-right: 15px; accent-color: var(--accent-color); transform: scale(1.2); }
+        .item-text { flex-grow: 1; }
+        .item-name { font-weight: bold; font-size: 0.95rem; }
+        .item-note { font-size: 0.75rem; color: #888; margin-top: 4px; }
+        .map-link { text-decoration: none; font-size: 1.3rem; padding: 5px; background: var(--bg-color); border-radius: 8px; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        .input-group input { flex: 1; padding: 12px; border: 1px solid var(--light-gray); border-radius: 8px; font-size: 1rem; }
+        button.add-btn { background-color: var(--accent-color); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; }
+        
+        /* 工具分頁特有樣式 */
+        .prompt-chip { background: var(--bg-color); color: var(--text-color); padding: 12px 15px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 10px; border: 1px solid #e8e2d5; line-height: 1.4; cursor: pointer; transition: background 0.2s; }
+        .prompt-chip:active { background: #e0d5c1; }
+
+        nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--light-gray); padding-bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 100;}
+        .nav-item { text-align: center; font-size: 0.7rem; color: #999; flex: 1; cursor: pointer; transition: color 0.2s; }
+        .nav-item.active { color: var(--accent-color); font-weight: bold; }
+        .nav-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+        [contenteditable="true"] { border-bottom: 1px dashed #ccc; transition: background 0.2s; }
+        [contenteditable="true"]:focus { background-color: #f0eadd; outline: none; border-bottom: 1px solid var(--accent-color); }
+    </style>
+</head>
+<body>
+
+<div id="index-page">
+    <h1 class="page-title">✈️ My Journeys</h1>
+    
+    <div id="trip-list">
+        <div class="trip-card" onclick="openTrip('nyc')">
+            <h2>🇺🇸 紐約 (New York)</h2>
+            <p>2026/04/20 - 04/24</p>
+        </div>
+        <div class="trip-card" onclick="alert('台灣搬遷頁面資料庫連線中...')">
+            <h2>🇹🇼 台灣搬遷與安頓</h2>
+            <p>2026/05 預定</p>
+        </div>
+    </div>
+
+    <div class="fab" onclick="document.getElementById('add-modal').style.display='flex'">+</div>
+</div>
+
+<div id="add-modal">
+    <div class="modal-content">
+        <button class="close-modal" onclick="document.getElementById('add-modal').style.display='none'">×</button>
+        <h2 class="modal-title">建立新旅程</h2>
+        
+        <div class="input-group-modal">
+            <label>目的地 (如：東京、巴黎)</label>
+            <input type="text" id="new-dest" placeholder="輸入你想去哪裡...">
+        </div>
+        <div class="input-group-modal">
+            <label>日期區間</label>
+            <input type="text" id="new-date" placeholder="如：2026/10/10 - 10/15">
+        </div>
+
+        <div id="ai-loading">✨ Gemini 正在為您搜集當地熱門景點與路線...</div>
+
+        <div id="modal-buttons">
+            <button class="btn-manual" onclick="createNewTrip('manual')">手動建立空白行程</button>
+            <button class="btn-ai" onclick="createNewTrip('ai')">
+                <span style="font-size: 1.2rem;">✨</span> AI 一鍵排程
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="trip-container">
+    <header class="trip-header">
+        <div class="header-info">
+            <h1 id="top-title">✈️ 紐約 New York</h1>
+            <p id="top-date">APR 20 - APR 24, 2026</p>
+        </div>
+        <button class="back-btn" onclick="goHome()">❮ 列表</button>
+    </header>
+
+    <div id="tab-itinerary" class="main-tab-content active">
+        <div class="date-tabs">
+            <div class="date-tab active" onclick="switchDate('day1', 'D1', '第一天行程', '🌤️', '--°C', this)"><div class="date">Day 1</div><div class="day">D1</div></div>
+            <div class="date-tab" onclick="switchDate('day2', 'D2', '第二天行程', '🌤️', '--°C', this)"><div class="date">Day 2</div><div class="day">D2</div></div>
+            <div class="date-tab" onclick="switchDate('day3', 'D3', '第三天行程', '🌤️', '--°C', this)"><div class="date">Day 3</div><div class="day">D3</div></div>
+            <div class="date-tab" onclick="switchDate('day4', 'D4', '第四天行程', '🌤️', '--°C', this)"><div class="date">Day 4</div><div class="day">D4</div></div>
+            <div class="date-tab" onclick="switchDate('day5', 'D5', '第五天行程', '🌤️', '--°C', this)"><div class="date">Day 5</div><div class="day">D5</div></div>
+        </div>
+
+        <div class="daily-board">
+            <div class="board-left"><h2 id="board-date">4/20 (一)</h2><p id="board-summary">啟程飛往美東</p></div>
+            <div class="board-right"><div class="weather-icon" id="board-icon">🌙</div><div class="weather-temp" id="board-temp">12°C</div><div class="weather-loc">當地預報</div></div>
+        </div>
+
+        <div id="day1" class="day-content active">
+            <div class="timeline-card"><div class="time-col"><div class="time" contenteditable="true">21:53</div><div class="period">晚上</div></div><div class="event-col"><div class="event-title" contenteditable="true">✈️ 航班起飛 (HA 6651)</div><div class="event-addr" contenteditable="true">📍 自舊金山 (SFO) 出發</div></div></div>
+        </div>
+        <div id="day2" class="day-content">
+            <div class="timeline-card"><div class="time-col"><div class="time" contenteditable="true">06:30</div><div class="period">上午</div></div><div class="event-col"><div class="event-title" contenteditable="true">🛬 抵達紐華克機場</div><div class="event-addr" contenteditable="true">📍 EWR Airport</div></div></div>
+            <div class="timeline-card"><div class="time-col"><div class="time" contenteditable="true">09:00</div><div class="period">上午</div></div><div class="event-col"><div class="event-title" contenteditable="true">🏛️ 911 紀念博物館</div><div class="event-addr" contenteditable="true">📍 180 Greenwich St</div></div></div>
+        </div>
+        <div id="day3" class="day-content">
+            <div class="timeline-card"><div class="time-col"><div class="time" contenteditable="true">10:00</div><div class="period">上午</div></div><div class="event-col"><div class="event-title" contenteditable="true">🎨 MoMA 現代藝術博物館</div><div class="event-addr" contenteditable="true">📍 11 W 53rd St</div></div></div>
+        </div>
+        <div id="day4" class="day-content"><p style="text-align: center; color: #999; font-size: 0.8rem; margin-top: 30px;">點擊新增行程...</p></div>
+        <div id="day5" class="day-content">
+            <div class="timeline-card"><div class="time-col"><div class="time" contenteditable="true">18:23</div><div class="period">晚上</div></div><div class="event-col"><div class="event-title" contenteditable="true">✈️ 班機回程 (AS 293)</div><div class="event-addr" contenteditable="true">📍 回舊金山 (SFO)</div></div></div>
+        </div>
+    </div>
+
+    <div id="tab-mustbuy" class="main-tab-content page-content">
+        <h3 class="section-title">🛍️ 推薦清單</h3>
+        <div class="card">
+            <strong>🗽 紐約任天堂限定皮卡丘</strong>
+            <p style="font-size: 0.85rem; color: #666; margin-top: 5px;">地點：Nintendo NY (洛克斐勒中心)</p>
+        </div>
+    </div>
+    
+    <div id="tab-shopping" class="main-tab-content page-content">
+        <h3 class="section-title">🛒 採買清單</h3>
+        <div class="card" style="padding: 5px 15px;">
+            <div class="list-item"><div class="item-text"><div class="item-name">紐約限定皮卡丘 (1)</div><div class="item-note">指定：Nintendo NY</div></div><a href="http://maps.apple.com/?q=Nintendo+NY" class="map-link">📍</a></div>
+            <div class="list-item"><div class="item-text"><div class="item-name">Ricoh 相機配件</div><div class="item-note">推薦：B&H Photo Video</div></div><a href="http://maps.apple.com/?q=B&H+Photo+Video" class="map-link">📍</a></div>
+        </div>
+    </div>
+
+    <div id="tab-tools" class="main-tab-content page-content">
+        <h3 class="section-title">🧰 旅行助手</h3>
+        <div class="card">
+            <strong style="color: var(--accent-color); font-size: 1.1rem;">💰 匯率換算 (USD ⇄ TWD)</strong>
+            <div style="display: flex; align-items: center; border-bottom: 2px solid var(--accent-color); padding-bottom: 5px; margin: 15px 0 10px 0;">
+                <span style="font-size: 1.2rem; margin-right: 10px;">$</span>
+                <input type="number" id="usd-input" placeholder="輸入當地金額..." oninput="calculateExchange()" style="border: none; outline: none; font-size: 1.2rem; width: 100%;">
+            </div>
+            <div style="text-align: right; color: #666;">約合台幣 <span id="twd-result" style="color: var(--accent-color); font-size: 1.6rem; font-weight: bold;">0</span> 元</div>
+        </div>
+        <div class="card" style="padding-bottom: 5px;">
+            <strong style="color: var(--accent-color); font-size: 1.1rem;">✨ Gemini AI 嚮導</strong>
+            <p style="font-size: 0.85rem; color: #666; margin: 10px 0 15px 0;">你可以把我當成隨身翻譯或在地嚮導：</p>
+            <div class="prompt-chip" onclick="alert('建議提示詞：\n紐約現在的午餐小費行情是多少？帳單 $45 包含稅金，我總共應該給多少？')">💬 小費怎麼算？(輸入帳單請我算)</div>
+            <div class="prompt-chip" onclick="alert('建議提示詞：\n我現在逛完很累，幫我找附近步行 10 分鐘內、適合單人吃的餐酒館。')">💬 找附近適合單人/放鬆的餐廳</div>
+            <div class="prompt-chip" onclick="alert('建議提示詞：\n幫我翻譯這份菜單，並根據我喜歡吃海鮮的偏好推薦。')">💬 翻譯全英文菜單並推薦餐點</div>
+        </div>
+    </div>
+
+    <div id="tab-packing" class="main-tab-content page-content">
+        <h3 class="section-title">🧳 行李清單</h3>
+        <div class="card" style="padding: 5px 15px;">
+            <div class="list-item"><div style="display: flex; align-items: center;"><input type="checkbox"><span class="item-name">護照與個人證件</span></div></div>
+            <div class="list-item"><div style="display: flex; align-items: center;"><input type="checkbox"><span class="item-name">Ricoh GR III 與備用電池</span></div></div>
+        </div>
+    </div>
+
+    <nav id="bottom-nav">
+        <div class="nav-item active" onclick="switchMainTab('tab-itinerary', this)"><span class="nav-icon">📍</span>行程</div>
+        <div class="nav-item" onclick="switchMainTab('tab-mustbuy', this)"><span class="nav-icon">✨</span>推薦</div>
+        <div class="nav-item" onclick="switchMainTab('tab-shopping', this)"><span class="nav-icon">🛒</span>購物</div>
+        <div class="nav-item" onclick="switchMainTab('tab-tools', this)"><span class="nav-icon">🧰</span>工具</div>
+        <div class="nav-item" onclick="switchMainTab('tab-packing', this)"><span class="nav-icon">🧳</span>行李</div>
+    </nav>
+</div>
+
+<script>
+    // --- 首頁與內頁切換邏輯 ---
+    function openTrip(tripId) {
+        if(tripId === 'nyc') {
+            document.getElementById('index-page').style.display = 'none';
+            document.getElementById('trip-container').style.display = 'block';
+            
+            // 恢復紐約資料
+            document.getElementById('top-title').innerText = '✈️ 紐約 New York';
+            document.getElementById('top-date').innerText = 'APR 20 - APR 24, 2026';
+            document.getElementById('board-date').innerText = '4/20 (一)';
+            document.getElementById('board-summary').innerText = '啟程飛往美東';
+            document.getElementById('board-icon').innerText = '🌙';
+            document.getElementById('board-temp').innerText = '12°C';
+            
+            // 確保回到行程頁籤
+            switchMainTab('tab-itinerary', document.querySelector('.nav-item'));
+            window.scrollTo(0, 0);
+        } else {
+            alert('系統正在為您讀取該旅程資料，請稍候...');
+        }
+    }
+
+    function goHome() {
+        document.getElementById('trip-container').style.display = 'none';
+        document.getElementById('index-page').style.display = 'block';
+        window.scrollTo(0, 0);
+    }
+
+    // --- 新增行程邏輯 ---
+    function createNewTrip(mode) {
+        const dest = document.getElementById('new-dest').value || '未命名旅程';
+        const date = document.getElementById('new-date').value || '日期未定';
+        
+        if (mode === 'ai') {
+            document.getElementById('modal-buttons').style.display = 'none';
+            document.getElementById('ai-loading').style.display = 'block';
+            setTimeout(() => {
+                appendTripCard(`✨ ${dest} (AI排程)`, date);
+                closeAndResetModal();
+            }, 1500);
+        } else {
+            appendTripCard(`📍 ${dest}`, date);
+            closeAndResetModal();
+        }
+    }
+
+    // 產生卡片並綁定開啟空白畫布
+    function appendTripCard(title, date) {
+        const list = document.getElementById('trip-list');
+        const newCard = document.createElement('div');
+        newCard.className = 'trip-card';
+        newCard.innerHTML = `<h2>${title}</h2><p>${date}</p>`;
+        newCard.onclick = () => openBlankTrip(title, date);
+        list.appendChild(newCard);
+    }
+
+    function closeAndResetModal() {
+        document.getElementById('add-modal').style.display = 'none';
+        document.getElementById('modal-buttons').style.display = 'block';
+        document.getElementById('ai-loading').style.display = 'none';
+        document.getElementById('new-dest').value = '';
+        document.getElementById('new-date').value = '';
+    }
+
+    // ★★★ 開啟空白可編輯旅程 ★★★
+    function openBlankTrip(title, date) {
+        document.getElementById('index-page').style.display = 'none';
+        document.getElementById('trip-container').style.display = 'block';
+        
+        // 替換標題與看板
+        document.getElementById('top-title').innerText = title;
+        document.getElementById('top-date').innerText = date;
+        document.getElementById('board-date').innerText = 'Day 1';
+        document.getElementById('board-summary').innerText = '準備出發';
+        document.getElementById('board-icon').innerText = '🌤️';
+        document.getElementById('board-temp').innerText = '--°C';
+
+        // 注入空白可編輯行程
+        document.getElementById('day1').innerHTML = `
+            <div class="timeline-card">
+                <div class="time-col"><div class="time" contenteditable="true">00:00</div><div class="period">全天</div></div>
+                <div class="event-col">
+                    <div class="event-title" contenteditable="true">✏️ 點擊這裡輸入行程</div>
+                    <div class="event-addr" contenteditable="true">📍 點擊輸入地點</div>
+                </div>
+            </div>
+        `;
+        for(let i=2; i<=5; i++) {
+             document.getElementById('day'+i).innerHTML = '<p style="text-align: center; color: #999; font-size: 0.8rem; margin-top: 30px;">點擊這裡新增行程...</p>';
+        }
+
+        // 確保切換過去時，畫面停在第一個分頁 (行程)
+        switchMainTab('tab-itinerary', document.querySelector('.nav-item'));
+        
+        // 切換到 D1 Tab
+        const firstDateTab = document.querySelector('.date-tab');
+        switchDate('day1', 'Day 1', '第一天行程', '🌤️', '--°C', firstDateTab);
+        window.scrollTo(0, 0);
+    }
+
+    // --- 分頁與工具列邏輯 ---
+    function switchMainTab(tabId, element) {
+        document.querySelectorAll('.main-tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        element.classList.add('active');
+    }
+
+    function switchDate(dayId, dateText, summaryText, weatherIcon, temp, element) {
+        document.querySelectorAll('.date-tab').forEach(tab => tab.classList.remove('active'));
+        element.classList.add('active');
+        document.querySelectorAll('.day-content').forEach(content => content.classList.remove('active'));
+        document.getElementById(dayId).classList.add('active');
+        
+        // 避免在空白行程中覆蓋使用者自己打的字，只在切換時簡單更新預設內容
+        document.getElementById('board-date').innerText = dateText;
+        document.getElementById('board-summary').innerText = summaryText;
+        document.getElementById('board-icon').innerText = weatherIcon;
+        document.getElementById('board-temp').innerText = temp;
+    }
+
+    function calculateExchange() {
+        const rate = 32.2; 
+        const usdInput = document.getElementById('usd-input').value;
+        const resultSpan = document.getElementById('twd-result');
+        if (usdInput && !isNaN(usdInput)) {
+            resultSpan.innerText = Math.round(usdInput * rate).toLocaleString('en-US'); 
+        } else {
+            resultSpan.innerText = '0';
+        }
+    }
+</script>
+
+</body>
+</html>
