@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Travel App 15.0</title>
+    <title>My Travel App 16.0</title>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
         :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --danger-color: #ff4d4f; }
@@ -26,6 +26,7 @@
         .nav-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
         .main-tab-content { display: none; padding: 0 20px 20px 20px; }
         .main-tab-content.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .date-tabs { display: flex; overflow-x: auto; padding: 10px 0; gap: 12px; scrollbar-width: none; margin: 0 -20px; padding-left: 20px; }
         .date-tab { min-width: 60px; text-align: center; padding: 10px 5px; border-radius: 14px; background: var(--card-bg); border: 1px solid #eee; cursor: pointer; color: #888; display: flex; flex-direction: column; gap: 4px;}
         .date-tab.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
@@ -41,7 +42,6 @@
         .map-link-btn { display: inline-block; font-size: 0.8rem; color: #1a73e8; background: #f1f3f4; padding: 4px 8px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; margin-top: 5px; }
         .delete-event-btn { position: absolute; right: 10px; top: 15px; }
         .card { background: var(--card-bg); border-radius: 12px; padding: 18px; margin-bottom: 15px; border: 1px solid #f0f0f0; }
-        button.add-btn { background-color: var(--accent-color); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         [contenteditable="true"] { border-bottom: 1px dashed transparent; min-height: 20px; display: inline-block; width: 100%; }
         [contenteditable="true"]:focus { background-color: #f0eadd; outline: none; border-bottom: 1px dashed var(--accent-color); }
     </style>
@@ -116,9 +116,9 @@
     let weatherForecast = [], currentDates = [], activeTripTitle = '', sortableInstance = null;
     let appData = { lastOpenTrip: null, hotelAddress: "127 E 30th St, New York, NY 10016", trips: [ { id: 1, title: '🇺🇸 紐約 (New York)', startDate: '2026-04-20' } ], shopping: [ { id: 1, text: '紐約皮卡丘玩偶', checked: false } ], packing: [ { id: 1, text: '護照', cat: '必備文件', checked: false } ], expenses: [], itineraries: {} };
 
-    function saveData() { localStorage.setItem('myTravelApp_V15', JSON.stringify(appData)); }
+    function saveData() { localStorage.setItem('myTravelApp_V16', JSON.stringify(appData)); }
     function loadData() {
-        const saved = localStorage.getItem('myTravelApp_V15');
+        const saved = localStorage.getItem('myTravelApp_V16');
         if (saved) { appData = JSON.parse(saved); } 
         else {
             appData.itineraries['🇺🇸 紐約 (New York)'] = {
@@ -132,14 +132,31 @@
                     { time: '16:00', title: '🕊️ Oculus（飛鳥車站）', loc: 'The Oculus' },
                     { time: '17:00', title: '🌅 Brookfield Place (河畔夕陽)', loc: 'Brookfield Place' }
                 ],
-                3: [ { time: '09:30', title: '🎨 大都會美術館', loc: 'MET' }, { time: '14:00', title: '🌳 中央公園', loc: 'Central Park' }, { time: '17:30', title: '🍃 Bryant Park', loc: 'Bryant Park' } ],
-                4: [ { time: '11:30', title: '🚶 高線公園', loc: 'High Line' }, { time: '13:00', title: '🦞 雀兒喜市場', loc: 'Chelsea Market' }, { time: '18:00', title: '🍝 晚餐：Tony\'s Di Napoli', loc: '147 W 43rd St' } ],
-                5: [ { time: '11:30', title: '🌉 布魯克林大橋', loc: 'Brooklyn Bridge' }, { time: '14:30', title: '🧳 回飯店拿行李', loc: '127 E 30th St' } ]
+                3: [
+                    { time: '09:30', title: '☕ Ralph\'s Coffee', loc: '888 Madison Ave' },
+                    { time: '10:30', title: '🎨 大都會美術館', loc: 'MET' },
+                    { time: '14:00', title: '🌳 中央公園漫步', loc: 'Central Park' },
+                    { time: '16:00', title: '🛍️ 第五大道逛街', loc: '5th Ave' },
+                    { time: '17:30', title: '🍃 Bryant Park', loc: 'Bryant Park' },
+                    { time: '19:00', title: '🎭 音樂劇：The Great Gatsby', loc: 'Broadway Theatre' }
+                ],
+                4: [
+                    { time: '10:00', title: '☕ Devocion Coffee', loc: 'Devocion Flatiron' },
+                    { time: '11:30', title: '🚶 高線公園 (High Line)', loc: 'High Line' },
+                    { time: '13:00', title: '🦞 雀兒喜市場', loc: 'Chelsea Market' },
+                    { time: '18:00', title: '🍝 晚餐：Tony\'s Di Napoli', loc: '147 W 43rd St' }
+                ],
+                5: [
+                    { time: '10:00', title: '🥯 Ess-a-Bagel 早餐', loc: '831 3rd Ave' },
+                    { time: '11:30', title: '🌉 布魯克林大橋', loc: 'Brooklyn Bridge' },
+                    { time: '14:30', title: '🧳 退房拿行李前往機場', loc: '127 E 30th St' }
+                ]
             };
             saveData();
         }
     }
 
+    // (其餘 JavaScript 邏輯維持不變)
     function renderTrips() { const list = document.getElementById('trip-list'); list.innerHTML = ''; appData.trips.forEach((trip, index) => { list.innerHTML += `<div class="trip-card" onclick="openTrip('${trip.title}', '${trip.startDate}')"><div class="trip-info"><h2>${trip.title}</h2><p>出發：${trip.startDate}</p></div><button class="delete-btn" onclick="deleteTrip(${index}, event)">${trashIcon}</button></div>`; }); }
     function openTrip(title, startDate) { activeTripTitle = title; appData.lastOpenTrip = title; saveData(); document.getElementById('index-page').style.display = 'none'; document.getElementById('trip-container').style.display = 'block'; document.getElementById('top-title').innerText = title; document.getElementById('top-date').innerText = `出發日：${startDate}`; generateDateTabs(startDate); fetchWeather(title); renderLists(); renderExpenses(); }
     function goHome() { appData.lastOpenTrip = null; saveData(); document.getElementById('trip-container').style.display = 'none'; document.getElementById('index-page').style.display = 'block'; }
