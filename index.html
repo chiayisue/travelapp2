@@ -1,46 +1,45 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Travel App 20.0</title>
+    <title>NY Travel App 22.0</title>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
         :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --danger-color: #ff4d4f; }
-        body { margin: 0; padding: 0; font-family: "PingFang TC", "Noto Sans TC", sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; overscroll-behavior-y: none; }
-        #index-page { padding: 20px; display: block; padding-bottom: 100px; animation: fadeIn 0.3s; }
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; overscroll-behavior-y: none; }
+        
+        #index-page { padding: 20px; display: block; padding-bottom: 100px; }
         .page-title { font-size: 1.8rem; margin: 10px 0 20px 0; letter-spacing: 1px; }
         .trip-card { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; cursor: pointer; display: flex; justify-content: space-between; align-items: center;}
-        .trip-info h2 { margin: 0 0 8px 0; font-size: 1.3rem; }
-        .trip-info p { margin: 0; color: #888; font-size: 0.85rem; font-weight: bold; }
-        .delete-btn { color: #d1c9c0; background: none; border: none; cursor: pointer; padding: 8px; }
-        .fab { position: fixed; bottom: 30px; right: 20px; width: 60px; height: 60px; background: var(--accent-color); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 2rem; box-shadow: 0 4px 15px rgba(140, 123, 108, 0.4); z-index: 100; cursor: pointer;}
+        .trip-info h2 { margin: 0 0 8px 0; font-size: 1.2rem; }
+        .trip-info p { margin: 0; color: #888; font-size: 0.8rem; font-weight: bold; }
+        
         #trip-container { display: none; padding-bottom: 90px; }
         .trip-header { padding: 20px 20px 10px 20px; display: flex; justify-content: space-between; align-items: flex-start; position: sticky; top: 0; background-color: var(--bg-color); z-index: 90; }
         .header-info h1 { margin: 0; font-size: 1.4rem; }
-        .header-info p { margin: 4px 0 0 0; font-size: 0.8rem; color: #888; font-weight: bold; }
         .back-btn { background: #fff; border: 1px solid var(--light-gray); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; color: var(--accent-color); cursor: pointer;}
+        
         nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--light-gray); padding-bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 100;}
         .nav-item { text-align: center; font-size: 0.7rem; color: #999; flex: 1; cursor: pointer; }
         .nav-item.active { color: var(--accent-color); font-weight: bold; }
         .nav-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+
         .main-tab-content { display: none; padding: 0 20px 20px 20px; }
-        .main-tab-content.active { display: block; animation: fadeIn 0.3s; }
+        .main-tab-content.active { display: block; }
         .date-tabs { display: flex; overflow-x: auto; padding: 10px 0; gap: 12px; scrollbar-width: none; margin: 0 -20px; padding-left: 20px; }
-        .date-tab { min-width: 60px; text-align: center; padding: 10px 5px; border-radius: 14px; background: var(--card-bg); border: 1px solid #eee; cursor: pointer; color: #888; display: flex; flex-direction: column; gap: 4px;}
+        .date-tab { min-width: 60px; text-align: center; padding: 10px 5px; border-radius: 14px; background: var(--card-bg); border: 1px solid #eee; cursor: pointer; color: #888; }
         .date-tab.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
-        .daily-board { padding: 20px; background: var(--card-bg); border-radius: 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border: 1px solid #f0f0f0; }
-        .timeline-card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #f0f0f0; display: flex; gap: 15px; position: relative; }
-        .drag-handle { color: #ccc; display: flex; align-items: center; justify-content: center; padding-right: 5px; font-size: 1.5rem; cursor: grab; touch-action: none; }
-        .time-col { min-width: 85px; text-align: left; }
-        .time-input { font-size: 0.95rem; font-weight: bold; color: var(--accent-color); background: var(--tab-bg); border: 1px solid var(--light-gray); border-radius: 8px; padding: 6px 8px; width: 100%; box-sizing: border-box; outline: none; cursor: pointer; text-align: center; -webkit-appearance: none; }
-        .event-col { border-left: 2px solid var(--accent-color); padding-left: 15px; position: relative; flex-grow: 1; }
-        .event-col::before { content: ''; width: 8px; height: 8px; background: var(--accent-color); border-radius: 50%; position: absolute; left: -5px; top: 5px; }
-        .event-title { font-size: 1rem; font-weight: bold; margin: 0 0 5px 0; }
-        .loc-text { font-size: 0.8rem; color: #888; margin-bottom: 5px; }
-        .map-link-btn { display: inline-block; font-size: 0.8rem; color: #1a73e8; background: #f1f3f4; padding: 4px 8px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; margin-top: 5px; }
-        .delete-event-btn { position: absolute; right: 10px; top: 15px; }
-        .card { background: var(--card-bg); border-radius: 12px; padding: 18px; margin-bottom: 15px; border: 1px solid #f0f0f0; }
+        
+        .timeline-card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 12px; border: 1px solid #f0f0f0; display: flex; gap: 12px; }
+        .time-col { min-width: 75px; }
+        .time-input { font-size: 0.9rem; font-weight: bold; color: var(--accent-color); border: none; background: var(--tab-bg); border-radius: 6px; padding: 4px; width: 100%; text-align: center; }
+        .event-col { border-left: 2px solid var(--accent-color); padding-left: 12px; flex-grow: 1; }
+        .event-title { font-size: 0.95rem; font-weight: bold; margin-bottom: 4px; }
+        .loc-text { font-size: 0.75rem; color: #888; }
+        .map-link-btn { font-size: 0.7rem; color: #1a73e8; background: #f1f3f4; padding: 3px 6px; border-radius: 6px; border: none; margin-top: 6px; cursor: pointer; }
+        .delete-btn { color: #ccc; background: none; border: none; }
+        .card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #f0f0f0; }
     </style>
 </head>
 <body>
@@ -48,98 +47,122 @@
 <div id="index-page">
     <h1 class="page-title">✈️ My Journeys</h1>
     <div id="trip-list"></div>
-    <div class="fab" onclick="document.getElementById('add-modal').style.display='flex'">+</div>
-</div>
-
-<div id="add-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: flex-end;">
-    <div class="modal-content" style="background: var(--bg-color); width: 100%; border-radius: 24px 24px 0 0; padding: 30px 20px 40px 20px;">
-        <button onclick="document.getElementById('add-modal').style.display='none'" style="float:right; background:none; border:none; font-size:1.5rem;">×</button>
-        <h2 style="margin-top:0;">建立新旅程</h2>
-        <div style="margin-bottom:15px;"><label style="display:block; font-size:0.8rem; margin-bottom:5px;">目的地</label><input type="text" id="new-dest" placeholder="輸入目的地..." style="width:100%; padding:12px; border:1px solid var(--light-gray); border-radius:10px;"></div>
-        <div style="margin-bottom:15px;"><label style="display:block; font-size:0.8rem; margin-bottom:5px;">出發日期</label><input type="date" id="new-start-date" style="width:100%; padding:12px; border:1px solid var(--light-gray); border-radius:10px;"></div>
-        <button onclick="createNewTrip()" style="width:100%; padding:14px; background:var(--accent-color); color:white; border:none; border-radius:12px; font-weight:bold;">建立行程</button>
-    </div>
 </div>
 
 <div id="trip-container">
     <header class="trip-header">
-        <div class="header-info"><h1 id="top-title">載入中...</h1><p id="top-date">...</p></div>
-        <button class="back-btn" onclick="goHome()">❮ 列表</button>
+        <div class="header-info"><h1 id="top-title">Loading...</h1><p id="top-date">...</p></div>
+        <button class="back-btn" onclick="goHome()">❮ Home</button>
     </header>
-    <div id="tab-itinerary" class="main-tab-content active" style="padding-top:0;">
+    <div id="tab-itinerary" class="main-tab-content active">
         <div class="date-tabs" id="dynamic-date-tabs"></div>
-        <div class="daily-board">
-            <div class="board-left"><h2 id="board-date">Day 1</h2><p id="board-summary">準備出發</p></div>
-            <div class="board-right" id="weather-box"><div class="weather-icon" id="board-icon">⏳</div><div class="weather-temp" id="board-temp">抓取中</div></div>
-        </div>
         <div id="itinerary-list"></div>
-        <button onclick="addItineraryEvent()" style="background: var(--tab-bg); color: var(--accent-color); border: 1px dashed var(--accent-color); padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer;">+ 新增時段</button>
+        <button onclick="addItineraryEvent()" style="width:100%; padding:12px; border:1px dashed var(--accent-color); background:none; color:var(--accent-color); border-radius:8px; font-weight:bold; margin-top:10px;">+ Add Event</button>
+    </div>
+    <div id="tab-expenses" class="main-tab-content">
+        <h3 style="color: var(--accent-color);">💰 Expenses</h3>
+        <div class="card" id="expense-list-container"></div>
+    </div>
+    <div id="tab-tools" class="main-tab-content">
+        <h3 style="color: var(--accent-color);">🧰 Tools</h3>
+        <div class="card"><strong>🏨 Hotel Address</strong><div contenteditable="true" id="hotel-address" style="margin: 10px 0; font-size:0.9rem;">127 E 30th St, New York, NY 10016</div><button onclick="openHotelMap()" style="width:100%; padding:10px; border:none; border-radius:8px; background:#e8f0fe; color:#1a73e8; font-weight:bold;">Open in Maps</button></div>
     </div>
     <nav>
-        <div class="nav-item active" onclick="switchMainTab('tab-itinerary', this)"><span class="nav-icon">📍</span>行程</div>
-        <div class="nav-item" onclick="switchMainTab('tab-expenses', this)"><span class="nav-icon">💰</span>記帳</div>
-        <div class="nav-item" onclick="switchMainTab('tab-shopping', this)"><span class="nav-icon">🛒</span>購物</div>
-        <div class="nav-item" onclick="switchMainTab('tab-tools', this)"><span class="nav-icon">🧰</span>工具</div>
+        <div class="nav-item active" onclick="switchMainTab('tab-itinerary', this)"><span class="nav-icon">📍</span>Plan</div>
+        <div class="nav-item" onclick="switchMainTab('tab-expenses', this)"><span class="nav-icon">💰</span>Spend</div>
+        <div class="nav-item" onclick="switchMainTab('tab-tools', this)"><span class="nav-icon">🧰</span>Tools</div>
     </nav>
 </div>
 
 <script>
-    const trashIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>`;
-    let appData = { lastOpenTrip: null, trips: [ { id: 1, title: '🇺🇸 紐約 (New York)', startDate: '2026-04-20' } ], itineraries: {} };
+    let activeTripTitle = '';
+    let appData = { lastOpenTrip: null, itineraries: {} };
 
-    function saveData() { localStorage.setItem('myTravelApp_V20', JSON.stringify(appData)); }
+    function saveData() { localStorage.setItem('myTravelApp_V22', JSON.stringify(appData)); }
     function loadData() {
-        const saved = localStorage.getItem('myTravelApp_V20');
+        const saved = localStorage.getItem('myTravelApp_V22');
         if (saved) { appData = JSON.parse(saved); } 
         else {
-            appData.itineraries['🇺🇸 紐約 (New York)'] = {
-                1: [ { time: '21:53', title: '✈️ 航班起飛', loc: 'SFO' } ],
+            appData.itineraries['🇺🇸 New York Trip'] = {
+                1: [{ time: '21:53', title: 'Flight Departure', loc: 'SFO Airport' }],
                 2: [
-                    { time: '08:30', title: '🏨 飯店寄放行李', loc: '127 E 30th St' },
-                    { time: '17:00', title: '🌅 Brookfield Place 夕陽', loc: 'Brookfield Place' },
-                    { time: '19:30', title: '🥣 晚餐：OKDONGSIK 豬肉湯飯', loc: '13 E 30th St' }
+                    { time: '08:30', title: 'Hotel Luggage Drop-off', loc: '127 E 30th St' },
+                    { time: '09:15', title: 'Breakfast: Best Bagel & Coffee', loc: '225 W 35th St' },
+                    { time: '11:00', title: 'Coffee: Stumptown Coffee', loc: '18 W 29th St' },
+                    { time: '13:00', title: '9/11 Memorial & Museum', loc: '180 Greenwich St' },
+                    { time: '16:00', title: 'The Oculus & Westfield', loc: 'The Oculus' },
+                    { time: '19:00', title: 'Dinner: OKDONGSIK', loc: '13 E 30th St' }
                 ],
                 3: [
-                    { time: '10:30', title: '🎨 大都會美術館', loc: 'MET' },
-                    { time: '17:30', title: '🍽️ 劇前晚餐：Danji (韓式創意)', loc: '346 W 52nd St' },
-                    { time: '19:00', title: '🎭 音樂劇：The Great Gatsby', loc: '1681 Broadway' }
+                    { time: '09:30', title: 'Coffee: Ground Central Coffee Co.', loc: '28 E 28th St' },
+                    { time: '11:00', title: 'The Metropolitan Museum of Art (MET)', loc: '1000 5th Ave' },
+                    { time: '14:30', title: 'Central Park Stroll', loc: 'Central Park' },
+                    { time: '17:15', title: 'Dinner: Danji (Reservation)', loc: '346 W 52nd St' },
+                    { time: '19:00', title: 'Broadway: The Great Gatsby', loc: 'Broadway Theatre' }
                 ],
                 4: [
-                    { time: '11:30', title: '🚶 高線公園 (High Line)', loc: 'High Line' },
-                    { time: '13:00', title: '🦞 雀兒喜市場', loc: 'Chelsea Market' }
+                    { time: '10:00', title: 'Coffee: Devoción', loc: '25 E 20th St' },
+                    { time: '11:30', title: 'The High Line', loc: 'High Line Park' },
+                    { time: '13:00', title: 'Chelsea Market (Lunch)', loc: '75 9th Ave' },
+                    { time: '16:00', title: 'West Village Exploration', loc: 'West Village' },
+                    { time: '18:30', title: 'Dinner: Tony\'s Di Napoli', loc: '147 W 43rd St' }
                 ],
                 5: [
-                    { time: '11:30', title: '🌉 布魯克林大橋', loc: 'Brooklyn Bridge' },
-                    { time: '15:00', title: '🧳 前往機場', loc: 'JFK' }
+                    { time: '09:00', title: 'Breakfast: Ess-a-Bagel', loc: '831 3rd Ave' },
+                    { time: '11:00', title: 'Brooklyn Bridge', loc: 'Brooklyn Bridge' },
+                    { time: '15:00', title: 'Head to JFK/EWR Airport', loc: 'NYC' }
                 ]
             };
             saveData();
         }
     }
-    // 其餘渲染邏輯與 V19 相同...
-    // (為節省空間，此處省略與 V19 重複的 JS 功能函數，如需完整代碼可隨時告知)
-    loadData();
-    function renderTrips() { const list = document.getElementById('trip-list'); list.innerHTML = ''; appData.trips.forEach((trip) => { list.innerHTML += `<div class="trip-card" onclick="openTrip('${trip.title}', '${trip.startDate}')"><div class="trip-info"><h2>${trip.title}</h2><p>出發：${trip.startDate}</p></div></div>`; }); }
-    function openTrip(title, startDate) { activeTripTitle = title; document.getElementById('index-page').style.display = 'none'; document.getElementById('trip-container').style.display = 'block'; document.getElementById('top-title').innerText = title; generateDateTabs(startDate); }
-    function generateDateTabs(startDateStr) {
-        const tabsContainer = document.getElementById('dynamic-date-tabs'); tabsContainer.innerHTML = '';
-        const parts = startDateStr.split('-'), start = new Date(parts[0], parts[1] - 1, parts[2]);
-        for(let i=0; i<5; i++) {
-            let current = new Date(start); current.setDate(start.getDate() + i);
-            let displayDate = `${current.getMonth() + 1}/${current.getDate()}`;
-            tabsContainer.innerHTML += `<div class="date-tab" onclick="switchDate(${i+1}, this)"><div class="day">D${i+1}</div><div class="date">${displayDate}</div></div>`;
-        }
-        switchDate(1, tabsContainer.children[0]);
+
+    function renderTrips() {
+        const list = document.getElementById('trip-list');
+        list.innerHTML = `<div class="trip-card" onclick="openTrip('🇺🇸 New York Trip', '2026-04-20')"><div class="trip-info"><h2>🇺🇸 New York Trip</h2><p>Starts: 2026-04-20</p></div></div>`;
     }
+
+    function openTrip(title, startDate) {
+        activeTripTitle = title;
+        document.getElementById('index-page').style.display = 'none';
+        document.getElementById('trip-container').style.display = 'block';
+        document.getElementById('top-title').innerText = title;
+        generateDateTabs(startDate);
+    }
+
+    function generateDateTabs(startDateStr) {
+        const tabsContainer = document.getElementById('dynamic-date-tabs');
+        tabsContainer.innerHTML = '';
+        for(let i=1; i<=5; i++) {
+            tabsContainer.innerHTML += `<div class="date-tab" onclick="switchDate(${i}, this)">Day ${i}</div>`;
+        }
+        switchDate(1, tabsContainer.firstChild);
+    }
+
     function switchDate(dayNum, element) {
-        document.querySelectorAll('.date-tab').forEach(t => t.classList.remove('active')); element.classList.add('active');
-        const container = document.getElementById('itinerary-list'); container.innerHTML = '';
-        let dayEvents = appData.itineraries[activeTripTitle][dayNum] || [];
-        dayEvents.forEach((ev) => {
-            container.innerHTML += `<div class="timeline-card"><div class="drag-handle">⋮⋮</div><div class="time-col"><div class="time-input">${ev.time}</div></div><div class="event-col"><div class="event-title">${ev.title}</div><div class="loc-text">${ev.loc}</div></div></div>`;
+        document.querySelectorAll('.date-tab').forEach(t => t.classList.remove('active'));
+        if(element) element.classList.add('active');
+        const container = document.getElementById('itinerary-list');
+        container.innerHTML = '';
+        const events = appData.itineraries[activeTripTitle][dayNum] || [];
+        events.forEach((ev, idx) => {
+            container.innerHTML += `<div class="timeline-card">
+                <div class="time-col"><input type="time" class="time-input" value="${ev.time}" onchange="saveItem(${dayNum}, ${idx}, 'time', this.value)"></div>
+                <div class="event-col">
+                    <div class="event-title" contenteditable="true" onblur="saveItem(${dayNum}, ${idx}, 'title', this.innerText)">${ev.title}</div>
+                    <div class="loc-text" contenteditable="true" onblur="saveItem(${dayNum}, ${idx}, 'loc', this.innerText)">${ev.loc}</div>
+                    <button class="map-link-btn" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ev.loc || ev.title)}','_blank')">🗺️ Maps</button>
+                </div>
+            </div>`;
         });
     }
-    renderTrips();
+
+    function saveItem(day, idx, field, val) { appData.itineraries[activeTripTitle][day][idx][field] = val; saveData(); }
+    function goHome() { document.getElementById('trip-container').style.display = 'none'; document.getElementById('index-page').style.display = 'block'; }
+    function switchMainTab(id, el) { document.querySelectorAll('.main-tab-content').forEach(c => c.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.getElementById(id).classList.add('active'); el.classList.add('active'); }
+    function openHotelMap() { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(document.getElementById('hotel-address').innerText)}`, '_blank'); }
+
+    loadData(); renderTrips();
 </script>
 </body>
 </html>
