@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NY Travel App 23.0</title>
+    <title>My Travel App 24.0</title>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
         :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --danger-color: #ff4d4f; }
@@ -19,7 +19,7 @@
         .back-btn { background: #fff; border: 1px solid var(--light-gray); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; color: var(--accent-color); cursor: pointer;}
         
         nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--light-gray); padding-bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 100;}
-        .nav-item { text-align: center; font-size: 0.7rem; color: #999; flex: 1; cursor: pointer; }
+        .nav-item { text-align: center; font-size: 0.75rem; color: #999; flex: 1; cursor: pointer; }
         .nav-item.active { color: var(--accent-color); font-weight: bold; }
         .nav-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
 
@@ -32,7 +32,6 @@
         .date-tab.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
         
         .daily-board { padding: 20px; background: var(--card-bg); border-radius: 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border: 1px solid #f0f0f0; }
-        .weather-icon { font-size: 1.5rem; }
         .weather-temp { font-weight: bold; font-size: 1.1rem; color: var(--accent-color); }
 
         .timeline-card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 12px; border: 1px solid #f0f0f0; display: flex; gap: 15px; position: relative; }
@@ -49,20 +48,19 @@
         .input-row { display: flex; gap: 10px; }
         input, select { flex: 1; padding: 12px; border: 1px solid var(--light-gray); border-radius: 8px; font-size: 1rem; }
         .add-btn { background: var(--accent-color); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        [contenteditable="true"]:focus { outline: none; background: #fffcf5; border-bottom: 1px dashed var(--accent-color); }
     </style>
 </head>
 <body>
 
 <div id="index-page">
-    <h1 class="page-title">✈️ My Journeys</h1>
+    <h1 class="page-title">✈️ 我的旅程列表</h1>
     <div id="trip-list"></div>
 </div>
 
 <div id="trip-container">
     <header class="trip-header">
         <div class="header-info"><h1 id="top-title">...</h1><p id="top-date">...</p></div>
-        <button class="back-btn" onclick="goHome()">❮ Home</button>
+        <button class="back-btn" onclick="goHome()">❮ 返回列表</button>
     </header>
 
     <div id="tab-itinerary" class="main-tab-content active">
@@ -70,69 +68,69 @@
         <div class="daily-board">
             <div class="board-left"><h2 id="board-date">Day 1</h2><p id="board-summary">New York, US</p></div>
             <div class="board-right" style="text-align: right;">
-                <div class="weather-icon" id="board-icon">☀️</div>
+                <div id="board-icon" style="font-size: 1.5rem;">☀️</div>
                 <div class="weather-temp" id="board-temp">--°C</div>
-                <div style="font-size: 0.6rem; color: #aaa;">Local Forecast</div>
+                <div style="font-size: 0.6rem; color: #aaa;">當地預報</div>
             </div>
         </div>
         <div id="itinerary-list"></div>
-        <button onclick="addItineraryEvent()" style="width:100%; padding:15px; border:1px dashed var(--accent-color); background:none; color:var(--accent-color); border-radius:12px; font-weight:bold; margin-top:10px;">+ Add New Event</button>
+        <button onclick="addItineraryEvent()" style="width:100%; padding:15px; border:1px dashed var(--accent-color); background:none; color:var(--accent-color); border-radius:12px; font-weight:bold; margin-top:10px;">+ 新增行程時段</button>
     </div>
 
     <div id="tab-expenses" class="main-tab-content">
-        <h3 style="color: var(--accent-color);">💰 Trip Expenses</h3>
+        <h3 style="color: var(--accent-color);">💰 旅途記帳本</h3>
         <div class="card" style="text-align: center;">
-            <div style="font-size: 0.8rem; color: #888;">Total (Approx. TWD)</div>
+            <div style="font-size: 0.8rem; color: #888;">目前總花費 (約合台幣)</div>
             <div style="font-size: 2.2rem; font-weight: bold; color: var(--accent-color);">NT$ <span id="total-twd">0</span></div>
         </div>
         <div class="input-group">
             <div class="input-row">
-                <select id="exp-cat"><option value="🍽️ Food">Food</option><option value="🛍️ Shop">Shop</option><option value="🚕 Trans">Trans</option><option value="🎫 Ticket">Ticket</option></select>
-                <input type="text" id="exp-name" placeholder="Item Name...">
+                <select id="exp-cat"><option value="🍽️ 餐飲">餐飲</option><option value="🛍️ 購物">購物</option><option value="🚕 交通">交通</option><option value="🎫 票券">票券</option></select>
+                <input type="text" id="exp-name" placeholder="項目名稱...">
             </div>
             <div class="input-row">
-                <input type="number" id="exp-amount" placeholder="Amount (USD)...">
-                <button class="add-btn" onclick="addExpense()" style="flex: 0.5;">Add</button>
+                <input type="number" id="exp-amount" placeholder="金額 (USD)...">
+                <button class="add-btn" onclick="addExpense()" style="flex: 0.5;">新增</button>
             </div>
         </div>
         <div class="card" id="expense-list-container"></div>
     </div>
 
     <div id="tab-lists" class="main-tab-content">
-        <h3 style="color: var(--accent-color);">🛒 Shopping List</h3>
-        <div class="input-row" style="margin-bottom: 20px;"><input type="text" id="shop-input" placeholder="What to buy?"><button class="add-btn" onclick="addListObj('shopping', 'shop-input', '')">Add</button></div>
+        <h3 style="color: var(--accent-color);">🛒 採買清單</h3>
+        <div class="input-row" style="margin-bottom: 20px;"><input type="text" id="shop-input" placeholder="想買什麼？"><button class="add-btn" onclick="addListObj('shopping', 'shop-input', '')">新增</button></div>
         <div class="card" id="shopping-list-container"></div>
 
-        <h3 style="color: var(--accent-color);">🧳 Packing List</h3>
+        <h3 style="color: var(--accent-color);">🧳 行李檢查</h3>
         <div class="input-group">
-            <select id="pack-cat"><option value="Essential">Essential</option><option value="Electronics">Electronics</option><option value="Clothes">Clothes</option></select>
-            <div class="input-row"><input type="text" id="pack-input" placeholder="What to pack?"><button class="add-btn" onclick="addListObj('packing', 'pack-input', 'pack-cat')">Add</button></div>
+            <select id="pack-cat"><option value="必備文件">必備文件</option><option value="電子產品">電子產品</option><option value="衣物配件">衣物配件</option></select>
+            <div class="input-row"><input type="text" id="pack-input" placeholder="要帶什麼？"><button class="add-btn" onclick="addListObj('packing', 'pack-input', 'pack-cat')">新增</button></div>
         </div>
         <div class="card" id="packing-list-container"></div>
     </div>
 
     <div id="tab-tools" class="main-tab-content">
-        <h3 style="color: var(--accent-color);">🧰 Travel Tools</h3>
+        <h3 style="color: var(--accent-color);">🧰 旅行助手</h3>
         <div class="card">
-            <strong>🏨 Hotel Address</strong>
+            <strong>🏨 飯店地址</strong>
             <div contenteditable="true" id="hotel-address" style="margin: 15px 0; font-weight: bold;" onblur="saveHotelAddress()">127 E 30th St, New York, NY 10016</div>
-            <button onclick="openHotelMap()" style="width:100%; padding:12px; border:none; border-radius:10px; background:#e8f0fe; color:#1a73e8; font-weight:bold;">View in Google Maps</button>
+            <button onclick="openHotelMap()" style="width:100%; padding:12px; border:none; border-radius:10px; background:#e8f0fe; color:#1a73e8; font-weight:bold;">在 Google Maps 開啟</button>
         </div>
         <div class="card">
-            <strong>💰 Currency Converter</strong>
+            <strong>💰 匯率換算 (1:32.2)</strong>
             <div style="display: flex; align-items: center; border-bottom: 2px solid var(--accent-color); padding: 10px 0;">
                 <span style="font-size: 1.5rem; margin-right: 10px;">$</span>
-                <input type="number" id="usd-input" placeholder="USD" oninput="calcExchange()" style="border:none; outline:none; font-size:1.5rem; width:100%; background:none;">
+                <input type="number" id="usd-input" placeholder="美金 USD" oninput="calcExchange()" style="border:none; outline:none; font-size:1.5rem; width:100%; background:none;">
             </div>
-            <div style="text-align: right; margin-top:15px; color: #666;">≈ <span id="twd-result" style="color: var(--accent-color); font-size: 1.8rem; font-weight: bold;">0</span> TWD</div>
+            <div style="text-align: right; margin-top:15px; color: #666;">≈ <span id="twd-result" style="color: var(--accent-color); font-size: 1.8rem; font-weight: bold;">0</span> 台幣</div>
         </div>
     </div>
 
     <nav>
-        <div class="nav-item active" onclick="switchMainTab('tab-itinerary', this)"><span class="nav-icon">📍</span>Plan</div>
-        <div class="nav-item" onclick="switchMainTab('tab-expenses', this)"><span class="nav-icon">💰</span>Spend</div>
-        <div class="nav-item" onclick="switchMainTab('tab-lists', this)"><span class="nav-icon">🛒</span>Lists</div>
-        <div class="nav-item" onclick="switchMainTab('tab-tools', this)"><span class="nav-icon">🧰</span>Tools</div>
+        <div class="nav-item active" onclick="switchMainTab('tab-itinerary', this)"><span class="nav-icon">📍</span>行程</div>
+        <div class="nav-item" onclick="switchMainTab('tab-expenses', this)"><span class="nav-icon">💰</span>記帳</div>
+        <div class="nav-item" onclick="switchMainTab('tab-lists', this)"><span class="nav-icon">🛒</span>清單</div>
+        <div class="nav-item" onclick="switchMainTab('tab-tools', this)"><span class="nav-icon">🧰</span>工具</div>
     </nav>
 </div>
 
@@ -144,47 +142,46 @@
     let appData = {
         lastOpenTrip: null,
         hotelAddress: "127 E 30th St, New York, NY 10016",
-        trips: [{ title: '🇺🇸 New York 2026', startDate: '2026-04-20' }],
-        shopping: [{ text: 'Nintendo Store Pikachu', checked: false }],
-        packing: [{ text: 'Passport', cat: 'Essential', checked: false }, { text: 'Ricoh GR III', cat: 'Electronics', checked: false }],
+        trips: [{ title: '🇺🇸 紐約春季之旅 2026', startDate: '2026-04-20' }],
+        shopping: [{ text: '紐約限定皮卡丘', checked: false }],
+        packing: [{ text: '護照', cat: '必備文件', checked: false }, { text: 'Ricoh GR III', cat: '電子產品', checked: false }],
         expenses: [],
         itineraries: {}
     };
 
-    function saveData() { localStorage.setItem('myTravelApp_V23', JSON.stringify(appData)); }
+    function saveData() { localStorage.setItem('myTravelApp_V24', JSON.stringify(appData)); }
     function loadData() {
-        const saved = localStorage.getItem('myTravelApp_V23');
+        const saved = localStorage.getItem('myTravelApp_V24');
         if (saved) { appData = JSON.parse(saved); } 
         else {
-            appData.itineraries['🇺🇸 New York 2026'] = {
-                1: [{ time: '21:53', title: 'Flight Departure (SFO)', loc: 'San Francisco Airport' }],
+            appData.itineraries['🇺🇸 紐約春季之旅 2026'] = {
+                1: [{ time: '21:53', title: '✈️ 航班起飛 (SFO)', loc: 'San Francisco Airport' }],
                 2: [
-                    { time: '08:30', title: 'Hotel Luggage Drop-off', loc: '127 E 30th St' },
-                    { time: '09:15', title: 'Breakfast: Best Bagel & Coffee', loc: '225 W 35th St' },
-                    { time: '11:00', title: 'Coffee: Stumptown Coffee', loc: '18 W 29th St' },
-                    { time: '13:00', title: '9/11 Memorial & Museum', loc: '180 Greenwich St' },
-                    { time: '16:30', title: 'Oculus & Brookfield Place (Sunset)', loc: 'The Oculus' },
-                    { time: '19:30', title: 'Dinner: OKDONGSIK (Soup Rice)', loc: '13 E 30th St' }
+                    { time: '08:30', title: '🏨 飯店寄放行李', loc: '127 E 30th St' },
+                    { time: '09:15', title: '🥯 早餐: Best Bagel & Coffee', loc: '225 W 35th St' },
+                    { time: '11:00', title: '☕ 咖啡: Stumptown Coffee', loc: '18 W 29th St' },
+                    { time: '13:00', title: '🏛️ 9/11 紀念館與博物館', loc: '180 Greenwich St' },
+                    { time: '16:30', title: '🕊️ Oculus 建築攝影 & 夕陽', loc: 'The Oculus' },
+                    { time: '19:30', title: '🥣 晚餐: OKDONGSIK 豬肉湯飯', loc: '13 E 30th St' }
                 ],
                 3: [
-                    { time: '09:00', title: 'Coffee: Ground Central (NoMad)', loc: '28 E 28th St' },
-                    { time: '10:30', title: 'The Metropolitan Museum of Art', loc: '1000 5th Ave' },
-                    { time: '14:30', title: 'Central Park Walk', loc: 'Central Park' },
-                    { time: '16:30', title: 'Bryant Park Relaxation', loc: 'Bryant Park' },
-                    { time: '17:15', title: 'Dinner: Danji (Reservation)', loc: '346 W 52nd St' },
-                    { time: '19:00', title: 'Broadway: The Great Gatsby', loc: 'Broadway Theatre' }
+                    { time: '09:00', title: '☕ 工業風咖啡: Ground Central', loc: '28 E 28th St' },
+                    { time: '10:30', title: '🎨 大都會美術館 (MET)', loc: '1000 5th Ave' },
+                    { time: '14:30', title: '🌳 中央公園漫步', loc: 'Central Park' },
+                    { time: '17:15', title: '🍽️ 預約晚餐: Danji', loc: '346 W 52nd St' },
+                    { time: '19:00', title: '🎭 音樂劇: The Great Gatsby', loc: 'Broadway Theatre' }
                 ],
                 4: [
-                    { time: '10:00', title: 'Coffee: Devoción (Williamsburg)', loc: '69 Grand St' },
-                    { time: '11:30', title: 'Domino Park & Waterfront', loc: '15 River St' },
-                    { time: '13:30', title: 'Chelsea Market & High Line', loc: '75 9th Ave' },
-                    { time: '16:30', title: 'West Village Exploration', loc: 'West Village' },
-                    { time: '18:30', title: 'Dinner: Tony\'s Di Napoli (Meet friends)', loc: '147 W 43rd St' }
+                    { time: '10:00', title: '☕ 總店天井: Devoción (Williamsburg)', loc: '69 Grand St' },
+                    { time: '11:30', title: '🌉 Domino Park 河岸攝影', loc: '15 River St' },
+                    { time: '13:30', title: '🦞 Chelsea Market & High Line', loc: '75 9th Ave' },
+                    { time: '16:30', title: '🌇 西村探索 (West Village)', loc: 'West Village' },
+                    { time: '18:30', title: '🍝 晚餐赴約: Tony\'s Di Napoli', loc: '147 W 43rd St' }
                 ],
                 5: [
-                    { time: '09:30', title: 'Breakfast: Ess-a-Bagel', loc: '831 3rd Ave' },
-                    { time: '11:30', title: 'Brooklyn Bridge Walk', loc: 'Brooklyn Bridge' },
-                    { time: '14:30', title: 'Pick up luggage & Airport', loc: '127 E 30th St' }
+                    { time: '09:30', title: '🥯 早餐: Ess-a-Bagel', loc: '831 3rd Ave' },
+                    { time: '11:30', title: '🌉 布魯克林大橋走拍', loc: 'Brooklyn Bridge' },
+                    { time: '14:30', title: '🧳 拿行李前往機場', loc: '127 E 30th St' }
                 ]
             };
             saveData();
@@ -194,7 +191,7 @@
     function renderTrips() {
         const list = document.getElementById('trip-list'); list.innerHTML = '';
         appData.trips.forEach(trip => {
-            list.innerHTML += `<div class="trip-card" onclick="openTrip('${trip.title}', '${trip.startDate}')"><div class="trip-info"><h2>${trip.title}</h2><p>Starts: ${trip.startDate}</p></div><span style="color:#ccc;">❯</span></div>`;
+            list.innerHTML += `<div class="trip-card" onclick="openTrip('${trip.title}', '${trip.startDate}')"><div class="trip-info"><h2>${trip.title}</h2><p>出發日期: ${trip.startDate}</p></div><span>❯</span></div>`;
         });
     }
 
@@ -203,7 +200,7 @@
         document.getElementById('index-page').style.display = 'none';
         document.getElementById('trip-container').style.display = 'block';
         document.getElementById('top-title').innerText = title;
-        document.getElementById('top-date').innerText = `Start Date: ${startDate}`;
+        document.getElementById('top-date').innerText = `出發日期: ${startDate}`;
         generateDateTabs(startDate); fetchWeather('New York'); renderLists(); renderExpenses();
     }
 
@@ -212,7 +209,7 @@
     function generateDateTabs(startDateStr) {
         const container = document.getElementById('dynamic-date-tabs'); container.innerHTML = ''; currentDates = [];
         const parts = startDateStr.split('-'), start = new Date(parts[0], parts[1]-1, parts[2]);
-        const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const weekdays = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
         for(let i=0; i<5; i++) {
             let current = new Date(start); current.setDate(start.getDate() + i);
             let mm = String(current.getMonth() + 1).padStart(2, '0'), dd = String(current.getDate()).padStart(2, '0'), displayDate = `${mm}/${dd}`;
@@ -228,7 +225,7 @@
         document.querySelectorAll('.date-tab').forEach(t => t.classList.remove('active')); if(element) element.classList.add('active');
         document.getElementById('board-date').innerText = `Day ${dayNum} (${currentDates[dayNum-1]})`;
         if(weatherForecast[dayNum-1]) {
-            document.getElementById('board-temp').innerText = `${weatherForecast[dayNum-1].min}°~${weatherForecast[dayNum-1].max}°`;
+            document.getElementById('board-temp').innerText = `${weatherForecast[dayNum-1].min}° ~ ${weatherForecast[dayNum-1].max}°`;
             document.getElementById('board-icon').innerText = weatherForecast[dayNum-1].icon;
         }
         renderItinerary(dayNum);
@@ -244,7 +241,7 @@
                 <div class="event-col">
                     <div class="event-title" contenteditable="true" onblur="updateEv(${dayNum}, ${idx}, 'title', this.innerText)">${ev.title}</div>
                     <div class="loc-text" contenteditable="true" onblur="updateEv(${dayNum}, ${idx}, 'loc', this.innerText)">${ev.loc}</div>
-                    <button class="map-link-btn" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ev.loc)}','_blank')">🗺️ Maps</button>
+                    <button class="map-link-btn" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ev.loc)}','_blank')">🗺️ Google Maps</button>
                 </div>
                 <button onclick="delEv(${dayNum}, ${idx})" style="position:absolute; right:10px; top:15px; border:none; background:none; color:#ddd;">×</button>
             </div>`;
@@ -261,10 +258,10 @@
     }
 
     function updateEv(d, i, f, v) { appData.itineraries[activeTripTitle][d][i][f] = v; saveData(); }
-    function delEv(d, i) { if(confirm('Delete?')) { appData.itineraries[activeTripTitle][d].splice(i, 1); saveData(); renderItinerary(d); } }
+    function delEv(d, i) { if(confirm('確定刪除？')) { appData.itineraries[activeTripTitle][d].splice(i, 1); saveData(); renderItinerary(d); } }
     function addItineraryEvent() { 
         const d = document.querySelector('.date-tab.active').innerText.match(/\d+/)[0];
-        appData.itineraries[activeTripTitle][d].push({ time: '12:00', title: 'New Event', loc: 'Location' }); 
+        appData.itineraries[activeTripTitle][d].push({ time: '12:00', title: '新景點名稱', loc: '英文地點' }); 
         saveData(); renderItinerary(d); 
     }
 
@@ -288,7 +285,7 @@
     }
     function renderExpenses() {
         const cont = document.getElementById('expense-list-container'); cont.innerHTML = ''; let t = 0;
-        appData.expenses.forEach((e, i) => { t += e.amt; cont.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px dashed #eee;"><div>${e.cat} ${e.name}</div><div>$${e.amt} <button onclick="delExp(${i})" style="border:none; background:none; color:#ccc;">${trashIcon}</button></div></div>`; });
+        appData.expenses.forEach((e, i) => { t += e.amt; cont.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px dashed #eee;"><div>${e.cat} ${e.name}</div><div>$${e.amt} <button onclick="delExp(${i})" style="border:none; background:none; color:#ccc;">×</button></div></div>`; });
         document.getElementById('total-twd').innerText = Math.round(t * 32.2).toLocaleString();
     }
     function delExp(i) { appData.expenses.splice(i, 1); saveData(); renderExpenses(); }
