@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Travel App 17.0</title>
+    <title>My Travel App 19.0</title>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
         :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --danger-color: #ff4d4f; }
@@ -26,7 +26,6 @@
         .nav-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
         .main-tab-content { display: none; padding: 0 20px 20px 20px; }
         .main-tab-content.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .date-tabs { display: flex; overflow-x: auto; padding: 10px 0; gap: 12px; scrollbar-width: none; margin: 0 -20px; padding-left: 20px; }
         .date-tab { min-width: 60px; text-align: center; padding: 10px 5px; border-radius: 14px; background: var(--card-bg); border: 1px solid #eee; cursor: pointer; color: #888; display: flex; flex-direction: column; gap: 4px;}
         .date-tab.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
@@ -116,9 +115,9 @@
     let weatherForecast = [], currentDates = [], activeTripTitle = '', sortableInstance = null;
     let appData = { lastOpenTrip: null, hotelAddress: "127 E 30th St, New York, NY 10016", trips: [ { id: 1, title: '🇺🇸 紐約 (New York)', startDate: '2026-04-20' } ], shopping: [ { id: 1, text: '紐約皮卡丘玩偶', checked: false } ], packing: [ { id: 1, text: '護照', cat: '必備文件', checked: false } ], expenses: [], itineraries: {} };
 
-    function saveData() { localStorage.setItem('myTravelApp_V17', JSON.stringify(appData)); }
+    function saveData() { localStorage.setItem('myTravelApp_V19', JSON.stringify(appData)); }
     function loadData() {
-        const saved = localStorage.getItem('myTravelApp_V17');
+        const saved = localStorage.getItem('myTravelApp_V19');
         if (saved) { appData = JSON.parse(saved); } 
         else {
             appData.itineraries['🇺🇸 紐約 (New York)'] = {
@@ -130,7 +129,8 @@
                     { time: '11:30', title: '🌳 麥迪遜廣場公園', loc: 'Madison Square Park' },
                     { time: '13:00', title: '🏛️ 9/11 國家紀念博物館', loc: '911 Memorial' },
                     { time: '16:00', title: '🕊️ Oculus（飛鳥車站）', loc: 'The Oculus' },
-                    { time: '17:00', title: '🌅 Brookfield Place (河畔夕陽)', loc: 'Brookfield Place' }
+                    { time: '17:00', title: '🌅 Brookfield Place (河畔夕陽)', loc: 'Brookfield Place' },
+                    { time: '19:00', title: '🥣 晚餐：OKDONGSIK 豬肉湯飯', loc: '13 E 30th St' }
                 ],
                 3: [
                     { time: '09:00', title: '☕ Ground Central (NoMad)', loc: '28 E 28th St' },
@@ -138,6 +138,7 @@
                     { time: '14:00', title: '🌳 中央公園漫步', loc: 'Central Park' },
                     { time: '16:00', title: '🛍️ 第五大道逛街', loc: '5th Ave' },
                     { time: '17:30', title: '🍃 Bryant Park', loc: 'Bryant Park' },
+                    { time: '18:00', title: '🍽️ 劇前晚餐：Joe Allen', loc: '326 W 46th St' },
                     { time: '19:00', title: '🎭 音樂劇：The Great Gatsby', loc: 'Broadway Theatre' }
                 ],
                 4: [
