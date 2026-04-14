@@ -3,34 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Travel App 25.0</title>
+    <title>My Travel App 26.0</title>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
         :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --danger-color: #ff4d4f; }
         body { margin: 0; padding: 0; font-family: "PingFang TC", "Noto Sans TC", -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; overscroll-behavior-y: none; }
+        
+        /* 列表頁面 */
         #index-page { padding: 20px; display: block; padding-bottom: 100px; animation: fadeIn 0.3s; }
         .page-title { font-size: 1.8rem; margin: 10px 0 20px 0; letter-spacing: 1px; }
         .trip-card { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; cursor: pointer; display: flex; justify-content: space-between; align-items: center;}
+        
+        /* 內頁容器 */
         #trip-container { display: none; padding-bottom: 90px; }
         .trip-header { padding: 20px 20px 10px 20px; display: flex; justify-content: space-between; align-items: flex-start; position: sticky; top: 0; background-color: var(--bg-color); z-index: 90; }
         .header-info h1 { margin: 0; font-size: 1.4rem; }
         .back-btn { background: #fff; border: 1px solid var(--light-gray); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; color: var(--accent-color); cursor: pointer;}
+        
+        /* 下方導航 */
         nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--light-gray); padding-bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 100;}
         .nav-item { text-align: center; font-size: 0.75rem; color: #999; flex: 1; cursor: pointer; }
         .nav-item.active { color: var(--accent-color); font-weight: bold; }
         .nav-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+
+        /* 行程 Tab */
         .main-tab-content { display: none; padding: 0 20px 20px 20px; }
         .main-tab-content.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
         .date-tabs { display: flex; overflow-x: auto; padding: 10px 0; gap: 12px; scrollbar-width: none; margin: 0 -20px; padding-left: 20px; }
         .date-tab { min-width: 65px; text-align: center; padding: 10px 5px; border-radius: 14px; background: var(--card-bg); border: 1px solid #eee; cursor: pointer; color: #888; display: flex; flex-direction: column; gap: 4px;}
         .date-tab.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
+        
+        /* 每日概要看板 */
         .daily-board { padding: 20px; background: var(--card-bg); border-radius: 16px; margin-bottom: 20px; border: 1px solid #f0f0f0; }
         .board-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
         .summary-box { background: var(--tab-bg); padding: 10px 15px; border-radius: 12px; border-left: 4px solid var(--accent-color); }
         .summary-label { font-size: 0.65rem; color: var(--accent-color); font-weight: bold; margin-bottom: 4px; }
-        .summary-text { font-size: 0.9rem; font-weight: bold; color: var(--text-color); }
+        .summary-text { font-size: 0.95rem; font-weight: bold; color: var(--text-color); line-height: 1.4; }
         .weather-temp { font-weight: bold; font-size: 1.1rem; color: var(--accent-color); }
+
+        /* 行程卡片 */
         .timeline-card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 12px; border: 1px solid #f0f0f0; display: flex; gap: 15px; position: relative; }
         .drag-handle { color: #ccc; cursor: grab; display: flex; align-items: center; font-size: 1.2rem; }
         .time-col { min-width: 80px; }
@@ -39,8 +52,9 @@
         .event-title { font-size: 1rem; font-weight: bold; margin-bottom: 4px; }
         .loc-text { font-size: 0.8rem; color: #888; }
         .map-link-btn { font-size: 0.75rem; color: #1a73e8; background: #f1f3f4; padding: 4px 8px; border-radius: 6px; border: none; margin-top: 8px; cursor: pointer; font-weight: bold;}
+        
+        /* 通用元件 */
         .card { background: var(--card-bg); border-radius: 12px; padding: 18px; margin-bottom: 15px; border: 1px solid #f0f0f0; }
-        input, select { flex: 1; padding: 12px; border: 1px solid var(--light-gray); border-radius: 8px; font-size: 1rem; }
         .add-btn { background: var(--accent-color); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         [contenteditable="true"]:focus { outline: none; background: #fffcf5; border-bottom: 1px dashed var(--accent-color); }
     </style>
@@ -48,7 +62,7 @@
 <body>
 
 <div id="index-page">
-    <h1 class="page-title">✈️ 我的旅程列表</h1>
+    <h1 class="page-title">✈️ 我的紐約旅程</h1>
     <div id="trip-list"></div>
 </div>
 
@@ -69,8 +83,8 @@
                 </div>
             </div>
             <div class="summary-box">
-                <div class="summary-label">TODAY'S HIGHLIGHT</div>
-                <div class="summary-text" id="board-summary" contenteditable="true" onblur="saveSummary()">點擊輸入今日重點...</div>
+                <div class="summary-label">TODAY'S HIGHLIGHT 今日重點</div>
+                <div class="summary-text" id="board-summary" contenteditable="true" onblur="saveSummary()">點擊輸入今日行程摘要...</div>
             </div>
         </div>
         <div id="itinerary-list"></div>
@@ -92,50 +106,52 @@
     let sortableInstance = null;
     let appData = {
         lastOpenTrip: null,
-        hotelAddress: "127 E 30th St, New York, NY 10016",
         trips: [{ title: '🇺🇸 紐約春季之旅 2026', startDate: '2026-04-20' }],
         summaries: {},
-        shopping: [], packing: [], expenses: [], itineraries: {}
+        itineraries: {}
     };
 
-    function saveData() { localStorage.setItem('myTravelApp_V25', JSON.stringify(appData)); }
+    function saveData() { localStorage.setItem('myTravelApp_V26', JSON.stringify(appData)); }
     function loadData() {
-        const saved = localStorage.getItem('myTravelApp_V25');
+        const saved = localStorage.getItem('myTravelApp_V26');
         if (saved) { appData = JSON.parse(saved); } 
         else {
             appData.summaries['🇺🇸 紐約春季之旅 2026'] = {
-                1: "抵達紐約 SFO -> JFK",
-                2: "下城區歷史與夕陽漫步",
-                3: "上東區藝術與百老匯之夜",
-                4: "Williamsburg 文青一日遊",
-                5: "西村探索與 High Line 告別"
+                1: "抵達紐約與飯店入住",
+                2: "下城區歷史、建築攝影與夕陽",
+                3: "上東區藝術、中央公園與百老匯",
+                4: "Williamsburg 文青深度一日遊",
+                5: "曼哈頓西側告別：High Line 與西村"
             };
             appData.itineraries['🇺🇸 紐約春季之旅 2026'] = {
                 1: [{ time: '21:53', title: '✈️ Flight Departure (SFO)', loc: 'SFO' }],
                 2: [
                     { time: '09:15', title: '🥯 Breakfast: Best Bagel & Coffee', loc: '225 W 35th St' },
+                    { time: '11:00', title: '☕ Coffee: Stumptown Coffee', loc: '18 W 29th St' },
                     { time: '13:00', title: '🏛️ 9/11 Memorial & Museum', loc: '180 Greenwich St' },
                     { time: '16:30', title: '🕊️ Oculus & Sunset View', loc: 'Brookfield Place' },
-                    { time: '19:30', title: '🥣 Dinner: OKDONGSIK', loc: '13 E 30th St' }
+                    { time: '19:30', title: '🥣 Dinner: OKDONGSIK 豬肉湯飯', loc: '13 E 30th St' }
                 ],
                 3: [
-                    { time: '09:00', title: '☕ Coffee: Ground Central', loc: '28 E 28th St' },
-                    { time: '10:30', title: '🎨 The MET Museum', loc: '1000 5th Ave' },
-                    { time: '17:15', title: '🍽️ Dinner: Danji', loc: '346 W 52nd St' },
+                    { time: '09:00', title: '☕ Coffee: Ground Central (NoMad)', loc: '28 E 28th St' },
+                    { time: '10:30', title: '🎨 The MET Museum (大都會美術館)', loc: '1000 5th Ave' },
+                    { time: '14:00', title: '🌳 Central Park Walk (中央公園漫步)', loc: 'Central Park' },
+                    { time: '15:30', title: '🥤 Bryant Park & Coffee (休息時光)', loc: 'Bryant Park' },
+                    { time: '17:15', title: '🍽️ Dinner: Danji (預約晚餐)', loc: '346 W 52nd St' },
                     { time: '19:00', title: '🎭 Broadway: The Great Gatsby', loc: 'Broadway Theatre' }
                 ],
                 4: [
-                    { time: '10:00', title: '🚇 Bedford Ave Station Start', loc: 'Bedford Ave' },
-                    { time: '11:00', title: '☕ Devoción (Williamsburg HQ)', loc: '69 Grand St' },
-                    { time: '13:00', title: '🌉 Domino Park & NYC Ferry', loc: '15 River St' },
-                    { time: '15:30', title: '📸 DUMBO & Brooklyn Bridge', loc: 'DUMBO' },
-                    { time: '18:30', title: '🍝 Dinner: Tony\'s Di Napoli', loc: '147 W 43rd St' }
+                    { time: '10:00', title: '🚇 Bedford Ave Station (Williamsburg 起點)', loc: 'Bedford Ave' },
+                    { time: '11:00', title: '☕ Devoción Williamsburg HQ (總店)', loc: '69 Grand St' },
+                    { time: '13:00', title: '🌉 Domino Park & Waterfront', loc: '15 River St' },
+                    { time: '15:30', title: '📸 DUMBO & Brooklyn Bridge (走回曼哈頓)', loc: 'DUMBO' },
+                    { time: '18:30', title: '🍝 Dinner: Tony\'s Di Napoli (赴約晚餐)', loc: '147 W 43rd St' }
                 ],
                 5: [
                     { time: '09:30', title: '🥯 Breakfast: Ess-a-Bagel', loc: '831 3rd Ave' },
-                    { time: '11:00', title: '🚶 High Line & Chelsea Market', loc: 'High Line' },
+                    { time: '11:00', title: '🚶 High Line & Chelsea Market', loc: '75 9th Ave' },
                     { time: '13:30', title: '🌇 West Village Exploration', loc: 'West Village' },
-                    { time: '15:30', title: '🧳 Pick up Luggage & Airport', loc: '127 E 30th St' }
+                    { time: '15:30', title: '✈️ Flight Departure (機場出發)', loc: 'JFK/EWR' }
                 ]
             };
             saveData();
@@ -161,7 +177,7 @@
         document.getElementById('index-page').style.display = 'none';
         document.getElementById('trip-container').style.display = 'block';
         document.getElementById('top-title').innerText = title;
-        document.getElementById('top-date').innerText = `出發日期: ${startDate}`;
+        document.getElementById('top-date').innerText = `出發日: ${startDate}`;
         generateDateTabs(startDate); fetchWeather('New York');
     }
 
@@ -220,7 +236,7 @@
     function addItineraryEvent() { 
         const d = document.querySelector('.date-tab.active').innerText.match(/\d+/)[0];
         if(!appData.itineraries[activeTripTitle][d]) appData.itineraries[activeTripTitle][d] = [];
-        appData.itineraries[activeTripTitle][d].push({ time: '12:00', title: 'New Event', loc: 'Location' }); 
+        appData.itineraries[activeTripTitle][d].push({ time: '12:00', title: '新行程', loc: '英文地點' }); 
         saveData(); renderItinerary(d); 
     }
 
