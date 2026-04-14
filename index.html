@@ -3,30 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Travel App 26.0</title>
+    <title>My Travel App 27.0</title>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
         :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --danger-color: #ff4d4f; }
         body { margin: 0; padding: 0; font-family: "PingFang TC", "Noto Sans TC", -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; overscroll-behavior-y: none; }
         
-        /* 列表頁面 */
         #index-page { padding: 20px; display: block; padding-bottom: 100px; animation: fadeIn 0.3s; }
         .page-title { font-size: 1.8rem; margin: 10px 0 20px 0; letter-spacing: 1px; }
         .trip-card { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; cursor: pointer; display: flex; justify-content: space-between; align-items: center;}
         
-        /* 內頁容器 */
         #trip-container { display: none; padding-bottom: 90px; }
         .trip-header { padding: 20px 20px 10px 20px; display: flex; justify-content: space-between; align-items: flex-start; position: sticky; top: 0; background-color: var(--bg-color); z-index: 90; }
         .header-info h1 { margin: 0; font-size: 1.4rem; }
         .back-btn { background: #fff; border: 1px solid var(--light-gray); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; color: var(--accent-color); cursor: pointer;}
         
-        /* 下方導航 */
         nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--light-gray); padding-bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 100;}
         .nav-item { text-align: center; font-size: 0.75rem; color: #999; flex: 1; cursor: pointer; }
         .nav-item.active { color: var(--accent-color); font-weight: bold; }
         .nav-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
 
-        /* 行程 Tab */
         .main-tab-content { display: none; padding: 0 20px 20px 20px; }
         .main-tab-content.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -35,7 +31,6 @@
         .date-tab { min-width: 65px; text-align: center; padding: 10px 5px; border-radius: 14px; background: var(--card-bg); border: 1px solid #eee; cursor: pointer; color: #888; display: flex; flex-direction: column; gap: 4px;}
         .date-tab.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
         
-        /* 每日概要看板 */
         .daily-board { padding: 20px; background: var(--card-bg); border-radius: 16px; margin-bottom: 20px; border: 1px solid #f0f0f0; }
         .board-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
         .summary-box { background: var(--tab-bg); padding: 10px 15px; border-radius: 12px; border-left: 4px solid var(--accent-color); }
@@ -43,7 +38,6 @@
         .summary-text { font-size: 0.95rem; font-weight: bold; color: var(--text-color); line-height: 1.4; }
         .weather-temp { font-weight: bold; font-size: 1.1rem; color: var(--accent-color); }
 
-        /* 行程卡片 */
         .timeline-card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 12px; border: 1px solid #f0f0f0; display: flex; gap: 15px; position: relative; }
         .drag-handle { color: #ccc; cursor: grab; display: flex; align-items: center; font-size: 1.2rem; }
         .time-col { min-width: 80px; }
@@ -53,8 +47,10 @@
         .loc-text { font-size: 0.8rem; color: #888; }
         .map-link-btn { font-size: 0.75rem; color: #1a73e8; background: #f1f3f4; padding: 4px 8px; border-radius: 6px; border: none; margin-top: 8px; cursor: pointer; font-weight: bold;}
         
-        /* 通用元件 */
         .card { background: var(--card-bg); border-radius: 12px; padding: 18px; margin-bottom: 15px; border: 1px solid #f0f0f0; }
+        .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        .input-row { display: flex; gap: 10px; }
+        input, select { flex: 1; padding: 12px; border: 1px solid var(--light-gray); border-radius: 8px; font-size: 1rem; }
         .add-btn { background: var(--accent-color); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         [contenteditable="true"]:focus { outline: none; background: #fffcf5; border-bottom: 1px dashed var(--accent-color); }
     </style>
@@ -91,6 +87,55 @@
         <button onclick="addItineraryEvent()" style="width:100%; padding:15px; border:1px dashed var(--accent-color); background:none; color:var(--accent-color); border-radius:12px; font-weight:bold; margin-top:10px;">+ 新增行程時段</button>
     </div>
 
+    <div id="tab-expenses" class="main-tab-content">
+        <h3 style="color: var(--accent-color);">💰 旅途記帳本</h3>
+        <div class="card" style="text-align: center;">
+            <div style="font-size: 0.8rem; color: #888;">目前總花費 (約合台幣)</div>
+            <div style="font-size: 2.2rem; font-weight: bold; color: var(--accent-color);">NT$ <span id="total-twd">0</span></div>
+        </div>
+        <div class="input-group">
+            <div class="input-row">
+                <select id="exp-cat"><option value="🍽️ 餐飲">餐飲</option><option value="🛍️ 購物">購物</option><option value="🚕 交通">交通</option><option value="🎫 票券">票券</option></select>
+                <input type="text" id="exp-name" placeholder="項目名稱...">
+            </div>
+            <div class="input-row">
+                <input type="number" id="exp-amount" placeholder="金額 (USD)...">
+                <button class="add-btn" onclick="addExpense()" style="flex: 0.5;">新增</button>
+            </div>
+        </div>
+        <div class="card" id="expense-list-container"></div>
+    </div>
+
+    <div id="tab-lists" class="main-tab-content">
+        <h3 style="color: var(--accent-color);">🛒 採買清單</h3>
+        <div class="input-row" style="margin-bottom: 20px;"><input type="text" id="shop-input" placeholder="想買什麼？"><button class="add-btn" onclick="addListObj('shopping', 'shop-input', '')">新增</button></div>
+        <div class="card" id="shopping-list-container"></div>
+
+        <h3 style="color: var(--accent-color);">🧳 行李檢查</h3>
+        <div class="input-group">
+            <select id="pack-cat"><option value="必備文件">必備文件</option><option value="電子產品">電子產品</option><option value="衣物配件">衣物配件</option></select>
+            <div class="input-row"><input type="text" id="pack-input" placeholder="要帶什麼？"><button class="add-btn" onclick="addListObj('packing', 'pack-input', 'pack-cat')">新增</button></div>
+        </div>
+        <div class="card" id="packing-list-container"></div>
+    </div>
+
+    <div id="tab-tools" class="main-tab-content">
+        <h3 style="color: var(--accent-color);">🧰 旅行助手</h3>
+        <div class="card">
+            <strong>🏨 飯店地址</strong>
+            <div contenteditable="true" id="hotel-address" style="margin: 15px 0; font-weight: bold;" onblur="saveHotelAddress()">127 E 30th St, New York, NY 10016</div>
+            <button onclick="openHotelMap()" style="width:100%; padding:12px; border:none; border-radius:10px; background:#e8f0fe; color:#1a73e8; font-weight:bold;">在 Google Maps 開啟</button>
+        </div>
+        <div class="card">
+            <strong>💰 匯率換算 (1:32.2)</strong>
+            <div style="display: flex; align-items: center; border-bottom: 2px solid var(--accent-color); padding: 10px 0;">
+                <span style="font-size: 1.5rem; margin-right: 10px;">$</span>
+                <input type="number" id="usd-input" placeholder="美金 USD" oninput="calcExchange()" style="border:none; outline:none; font-size:1.5rem; width:100%; background:none;">
+            </div>
+            <div style="text-align: right; margin-top:15px; color: #666;">≈ <span id="twd-result" style="color: var(--accent-color); font-size: 1.8rem; font-weight: bold;">0</span> 台幣</div>
+        </div>
+    </div>
+
     <nav>
         <div class="nav-item active" onclick="switchMainTab('tab-itinerary', this)"><span class="nav-icon">📍</span>行程</div>
         <div class="nav-item" onclick="switchMainTab('tab-expenses', this)"><span class="nav-icon">💰</span>記帳</div>
@@ -106,14 +151,16 @@
     let sortableInstance = null;
     let appData = {
         lastOpenTrip: null,
+        hotelAddress: "127 E 30th St, New York, NY 10016",
         trips: [{ title: '🇺🇸 紐約春季之旅 2026', startDate: '2026-04-20' }],
         summaries: {},
+        shopping: [], packing: [], expenses: [],
         itineraries: {}
     };
 
-    function saveData() { localStorage.setItem('myTravelApp_V26', JSON.stringify(appData)); }
+    function saveData() { localStorage.setItem('myTravelApp_V27', JSON.stringify(appData)); }
     function loadData() {
-        const saved = localStorage.getItem('myTravelApp_V26');
+        const saved = localStorage.getItem('myTravelApp_V27');
         if (saved) { appData = JSON.parse(saved); } 
         else {
             appData.summaries['🇺🇸 紐約春季之旅 2026'] = {
@@ -121,7 +168,7 @@
                 2: "下城區歷史、建築攝影與夕陽",
                 3: "上東區藝術、中央公園與百老匯",
                 4: "Williamsburg 文青深度一日遊",
-                5: "曼哈頓西側告別：High Line 與西村"
+                5: "曼哈頓西側告別：High Line 與歸途"
             };
             appData.itineraries['🇺🇸 紐約春季之旅 2026'] = {
                 1: [{ time: '21:53', title: '✈️ Flight Departure (SFO)', loc: 'SFO' }],
@@ -151,7 +198,8 @@
                     { time: '09:30', title: '🥯 Breakfast: Ess-a-Bagel', loc: '831 3rd Ave' },
                     { time: '11:00', title: '🚶 High Line & Chelsea Market', loc: '75 9th Ave' },
                     { time: '13:30', title: '🌇 West Village Exploration', loc: 'West Village' },
-                    { time: '15:30', title: '✈️ Flight Departure (機場出發)', loc: 'JFK/EWR' }
+                    { time: '15:30', title: '🧳 Pick up Luggage (回飯店拿行李)', loc: '127 E 30th St' },
+                    { time: '18:23', title: '✈️ Flight Departure (回程航班出發)', loc: 'JFK/EWR' }
                 ]
             };
             saveData();
@@ -178,7 +226,7 @@
         document.getElementById('trip-container').style.display = 'block';
         document.getElementById('top-title').innerText = title;
         document.getElementById('top-date').innerText = `出發日: ${startDate}`;
-        generateDateTabs(startDate); fetchWeather('New York');
+        generateDateTabs(startDate); fetchWeather('New York'); renderLists(); renderExpenses();
     }
 
     function goHome() { appData.lastOpenTrip = null; saveData(); document.getElementById('trip-container').style.display = 'none'; document.getElementById('index-page').style.display = 'block'; }
@@ -219,6 +267,7 @@
                     <div class="loc-text" contenteditable="true" onblur="updateEv(${dayNum}, ${idx}, 'loc', this.innerText)">${ev.loc}</div>
                     <button class="map-link-btn" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ev.loc)}','_blank')">🗺️ Google Maps</button>
                 </div>
+                <button onclick="delEv(${dayNum}, ${idx})" style="position:absolute; right:10px; top:15px; border:none; background:none; color:#ddd;">×</button>
             </div>`;
         });
         initSortable(dayNum);
@@ -233,10 +282,11 @@
     }
 
     function updateEv(d, i, f, v) { appData.itineraries[activeTripTitle][d][i][f] = v; saveData(); }
+    function delEv(d, i) { if(confirm('確定刪除？')) { appData.itineraries[activeTripTitle][d].splice(i, 1); saveData(); renderItinerary(d); } }
     function addItineraryEvent() { 
         const d = document.querySelector('.date-tab.active').innerText.match(/\d+/)[0];
         if(!appData.itineraries[activeTripTitle][d]) appData.itineraries[activeTripTitle][d] = [];
-        appData.itineraries[activeTripTitle][d].push({ time: '12:00', title: '新行程', loc: '英文地點' }); 
+        appData.itineraries[activeTripTitle][d].push({ time: '12:00', title: '新行程', loc: '地點' }); 
         saveData(); renderItinerary(d); 
     }
 
@@ -253,7 +303,39 @@
         } catch(e) {}
     }
 
+    function addExpense() {
+        const n = document.getElementById('exp-name'), a = document.getElementById('exp-amount'), c = document.getElementById('exp-cat');
+        if(!n.value || !a.value) return; appData.expenses.push({ cat: c.value, name: n.value, amt: parseFloat(a.value) });
+        saveData(); renderExpenses(); n.value = ''; a.value = '';
+    }
+    function renderExpenses() {
+        const cont = document.getElementById('expense-list-container'); cont.innerHTML = ''; let t = 0;
+        appData.expenses.forEach((e, i) => { t += e.amt; cont.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px dashed #eee;"><div>${e.cat} ${e.name}</div><div>$${e.amt} <button onclick="delExp(${i})" style="border:none; background:none; color:#ccc;">×</button></div></div>`; });
+        document.getElementById('total-twd').innerText = Math.round(t * 32.2).toLocaleString();
+    }
+    function delExp(i) { appData.expenses.splice(i, 1); saveData(); renderExpenses(); }
+
+    function addListObj(t, i, c) {
+        const v = document.getElementById(i); if(!v.value) return;
+        appData[t].push({ text: v.value, cat: c ? document.getElementById(c).value : '', checked: false });
+        saveData(); v.value = ''; renderLists();
+    }
+    function renderLists() {
+        document.getElementById('shopping-list-container').innerHTML = appData.shopping.map((item, i) => `<div style="padding:10px 0; border-bottom:1px solid #eee;"><input type="checkbox" ${item.checked?'checked':''} onchange="toggleCheck('shopping',${i})"> ${item.text}</div>`).join('');
+        const p = document.getElementById('packing-list-container'); p.innerHTML = ''; const g = {};
+        appData.packing.forEach((item, i) => { if(!g[item.cat]) g[item.cat] = []; item.idx = i; g[item.cat].push(item); });
+        for (const [cat, items] of Object.entries(g)) {
+            let h = `<div style="font-weight:bold; color:var(--accent-color); margin-top:10px;">${cat}</div>`;
+            items.forEach(item => { h += `<div style="padding:10px 0; border-bottom:1px solid #eee;"><input type="checkbox" ${item.checked?'checked':''} onchange="toggleCheck('packing',${item.idx})"> ${item.text}</div>`; });
+            p.innerHTML += h;
+        }
+    }
+    function toggleCheck(t, i) { appData[t][i].checked = !appData[t][i].checked; saveData(); renderLists(); }
+
     function switchMainTab(id, el) { document.querySelectorAll('.main-tab-content').forEach(c => c.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.getElementById(id).classList.add('active'); el.classList.add('active'); }
+    function calcExchange() { const v = document.getElementById('usd-input').value; document.getElementById('twd-result').innerText = v ? Math.round(v * 32.2).toLocaleString() : '0'; }
+    function saveHotelAddress() { appData.hotelAddress = document.getElementById('hotel-address').innerText; saveData(); }
+    function openHotelMap() { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(appData.hotelAddress)}`, '_blank'); }
 
     loadData(); renderTrips();
     if(appData.lastOpenTrip) openTrip(appData.lastOpenTrip, appData.trips[0].startDate);
