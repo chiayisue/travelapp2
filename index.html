@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Travel App 16.0</title>
+    <title>My Travel App 17.0</title>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
         :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --danger-color: #ff4d4f; }
@@ -116,9 +116,9 @@
     let weatherForecast = [], currentDates = [], activeTripTitle = '', sortableInstance = null;
     let appData = { lastOpenTrip: null, hotelAddress: "127 E 30th St, New York, NY 10016", trips: [ { id: 1, title: '🇺🇸 紐約 (New York)', startDate: '2026-04-20' } ], shopping: [ { id: 1, text: '紐約皮卡丘玩偶', checked: false } ], packing: [ { id: 1, text: '護照', cat: '必備文件', checked: false } ], expenses: [], itineraries: {} };
 
-    function saveData() { localStorage.setItem('myTravelApp_V16', JSON.stringify(appData)); }
+    function saveData() { localStorage.setItem('myTravelApp_V17', JSON.stringify(appData)); }
     function loadData() {
-        const saved = localStorage.getItem('myTravelApp_V16');
+        const saved = localStorage.getItem('myTravelApp_V17');
         if (saved) { appData = JSON.parse(saved); } 
         else {
             appData.itineraries['🇺🇸 紐約 (New York)'] = {
@@ -133,7 +133,7 @@
                     { time: '17:00', title: '🌅 Brookfield Place (河畔夕陽)', loc: 'Brookfield Place' }
                 ],
                 3: [
-                    { time: '09:30', title: '☕ Ralph\'s Coffee', loc: '888 Madison Ave' },
+                    { time: '09:00', title: '☕ Ground Central (NoMad)', loc: '28 E 28th St' },
                     { time: '10:30', title: '🎨 大都會美術館', loc: 'MET' },
                     { time: '14:00', title: '🌳 中央公園漫步', loc: 'Central Park' },
                     { time: '16:00', title: '🛍️ 第五大道逛街', loc: '5th Ave' },
@@ -156,7 +156,6 @@
         }
     }
 
-    // (其餘 JavaScript 邏輯維持不變)
     function renderTrips() { const list = document.getElementById('trip-list'); list.innerHTML = ''; appData.trips.forEach((trip, index) => { list.innerHTML += `<div class="trip-card" onclick="openTrip('${trip.title}', '${trip.startDate}')"><div class="trip-info"><h2>${trip.title}</h2><p>出發：${trip.startDate}</p></div><button class="delete-btn" onclick="deleteTrip(${index}, event)">${trashIcon}</button></div>`; }); }
     function openTrip(title, startDate) { activeTripTitle = title; appData.lastOpenTrip = title; saveData(); document.getElementById('index-page').style.display = 'none'; document.getElementById('trip-container').style.display = 'block'; document.getElementById('top-title').innerText = title; document.getElementById('top-date').innerText = `出發日：${startDate}`; generateDateTabs(startDate); fetchWeather(title); renderLists(); renderExpenses(); }
     function goHome() { appData.lastOpenTrip = null; saveData(); document.getElementById('trip-container').style.display = 'none'; document.getElementById('index-page').style.display = 'block'; }
