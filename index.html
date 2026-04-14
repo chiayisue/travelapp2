@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Travel App 28.0</title>
+    <title>My Travel App 29.0</title>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
         :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --danger-color: #ff4d4f; }
@@ -52,6 +52,8 @@
         .input-row { display: flex; gap: 10px; }
         input, select { flex: 1; padding: 12px; border: 1px solid var(--light-gray); border-radius: 8px; font-size: 1rem; }
         .add-btn { background: var(--accent-color); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .del-item-btn { border: none; background: none; color: #ddd; font-size: 1.2rem; cursor: pointer; padding: 5px; }
+        .list-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
         [contenteditable="true"]:focus { outline: none; background: #fffcf5; border-bottom: 1px dashed var(--accent-color); }
     </style>
 </head>
@@ -202,16 +204,8 @@
                     { time: '18:23', title: '✈️ Flight Departure (回程航班出發)', loc: 'JFK/EWR' }
                 ]
             };
-            appData.shopping = [
-                { text: '任天堂紐約旗艦店限定皮卡丘玩偶', checked: false },
-                { text: 'iPhone 17 Pro 專屬手機殼', checked: false },
-                { text: 'Ricoh GR III 備用電池或相關配件', checked: false },
-                { text: '先生的紐約風特別生日禮物', checked: false }
-            ];
-            appData.packing = [
-                { text: '護照與身分證件', cat: '必備文件', checked: false },
-                { text: 'Ricoh GR III 與充電器', cat: '電子產品', checked: false }
-            ];
+            appData.shopping = [{ text: '任天堂紐約旗艦店皮卡丘玩偶', checked: false }];
+            appData.packing = [{ text: '護照與證件', cat: '必備文件', checked: false }, { text: 'Ricoh GR III', cat: '電子產品', checked: false }];
             saveData();
         }
     }
@@ -323,7 +317,7 @@
         appData.expenses.forEach((e, i) => { t += e.amt; cont.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px dashed #eee;"><div>${e.cat} ${e.name}</div><div>$${e.amt} <button onclick="delExp(${i})" style="border:none; background:none; color:#ccc;">×</button></div></div>`; });
         document.getElementById('total-twd').innerText = Math.round(t * 32.2).toLocaleString();
     }
-    function delExp(i) { appData.expenses.splice(i, 1); saveData(); renderExpenses(); }
+    function delExp(i) { if(confirm('刪除此帳目？')) { appData.expenses.splice(i, 1); saveData(); renderExpenses(); } }
 
     function addListObj(t, i, c) {
         const v = document.getElementById(i); if(!v.value) return;
@@ -331,15 +325,16 @@
         saveData(); v.value = ''; renderLists();
     }
     function renderLists() {
-        document.getElementById('shopping-list-container').innerHTML = appData.shopping.map((item, i) => `<div style="padding:10px 0; border-bottom:1px solid #eee;"><input type="checkbox" ${item.checked?'checked':''} onchange="toggleCheck('shopping',${i})"> ${item.text}</div>`).join('');
+        document.getElementById('shopping-list-container').innerHTML = appData.shopping.map((item, i) => `<div class="list-row"><span><input type="checkbox" ${item.checked?'checked':''} onchange="toggleCheck('shopping',${i})"> ${item.text}</span><button class="del-item-btn" onclick="delListObj('shopping', ${i})">×</button></div>`).join('');
         const p = document.getElementById('packing-list-container'); p.innerHTML = ''; const g = {};
         appData.packing.forEach((item, i) => { if(!g[item.cat]) g[item.cat] = []; item.idx = i; g[item.cat].push(item); });
         for (const [cat, items] of Object.entries(g)) {
             let h = `<div style="font-weight:bold; color:var(--accent-color); margin-top:10px;">${cat}</div>`;
-            items.forEach(item => { h += `<div style="padding:10px 0; border-bottom:1px solid #eee;"><input type="checkbox" ${item.checked?'checked':''} onchange="toggleCheck('packing',${item.idx})"> ${item.text}</div>`; });
+            items.forEach(item => { h += `<div class="list-row"><span><input type="checkbox" ${item.checked?'checked':''} onchange="toggleCheck('packing',${item.idx})"> ${item.text}</span><button class="del-item-btn" onclick="delListObj('packing', ${item.idx})">×</button></div>`; });
             p.innerHTML += h;
         }
     }
+    function delListObj(type, idx) { if(confirm('確定刪除項目？')) { appData[type].splice(idx, 1); saveData(); renderLists(); } }
     function toggleCheck(t, i) { appData[t][i].checked = !appData[t][i].checked; saveData(); renderLists(); }
 
     function switchMainTab(id, el) { document.querySelectorAll('.main-tab-content').forEach(c => c.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.getElementById(id).classList.add('active'); el.classList.add('active'); }
