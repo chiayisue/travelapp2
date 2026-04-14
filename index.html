@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Travel App 27.0</title>
+    <title>My Travel App 28.0</title>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
         :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --danger-color: #ff4d4f; }
@@ -158,9 +158,9 @@
         itineraries: {}
     };
 
-    function saveData() { localStorage.setItem('myTravelApp_V27', JSON.stringify(appData)); }
+    function saveData() { localStorage.setItem('myTravelApp_Final', JSON.stringify(appData)); }
     function loadData() {
-        const saved = localStorage.getItem('myTravelApp_V27');
+        const saved = localStorage.getItem('myTravelApp_Final');
         if (saved) { appData = JSON.parse(saved); } 
         else {
             appData.summaries['🇺🇸 紐約春季之旅 2026'] = {
@@ -202,6 +202,16 @@
                     { time: '18:23', title: '✈️ Flight Departure (回程航班出發)', loc: 'JFK/EWR' }
                 ]
             };
+            appData.shopping = [
+                { text: '任天堂紐約旗艦店限定皮卡丘玩偶', checked: false },
+                { text: 'iPhone 17 Pro 專屬手機殼', checked: false },
+                { text: 'Ricoh GR III 備用電池或相關配件', checked: false },
+                { text: '先生的紐約風特別生日禮物', checked: false }
+            ];
+            appData.packing = [
+                { text: '護照與身分證件', cat: '必備文件', checked: false },
+                { text: 'Ricoh GR III 與充電器', cat: '電子產品', checked: false }
+            ];
             saveData();
         }
     }
