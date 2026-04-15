@@ -8,8 +8,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Sue's Trip">
-    <link rel="apple-touch-icon" href="https://i.imgur.com/妳的正確圖片ID.png">
-    <link rel="icon" href="https://i.imgur.com/妳的正確圖片ID.png">
+    <link rel="apple-touch-icon" href="blob:https://imgur.com/78358678-b246-4d0e-9763-f8d235312e6c">
+    <link rel="icon" href="blob:https://imgur.com/78358678-b246-4d0e-9763-f8d235312e6c">
 
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
@@ -56,12 +56,19 @@
         
         .card { background: var(--card-bg); border-radius: 12px; padding: 18px; margin-bottom: 15px; border: 1px solid #f0f0f0; }
         
-        /* 🔥 這次唯一修改的地方：加大輸入框與按鈕尺寸，防誤觸與防自動放大 🔥 */
-        input, select { flex: 1; width: 100%; padding: 16px 14px; border: 1px solid var(--light-gray); border-radius: 10px; font-size: 16px; min-height: 50px; box-sizing: border-box; background-color: #fff; }
+        /* 🔥 分離樣式：只加大文字與下拉輸入框 🔥 */
+        input[type="text"], input[type="number"], select { flex: 1; width: 100%; padding: 16px 14px; border: 1px solid var(--light-gray); border-radius: 10px; font-size: 16px; min-height: 50px; box-sizing: border-box; background-color: #fff; }
+        
+        /* 🔥 勾選框獨立縮小並確保同一行 🔥 */
+        input[type="checkbox"] { width: 22px; height: 22px; min-height: auto; margin: 0 10px 0 0; flex: none; cursor: pointer; }
         .add-btn { background: var(--accent-color); color: white; border: none; padding: 16px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; min-height: 50px; white-space: nowrap; }
         
         .del-item-btn { border: none; background: none; color: #ddd; font-size: 1.2rem; cursor: pointer; padding: 5px; }
-        .list-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+        
+        /* 🔥 確保清單文字不會折行 🔥 */
+        .list-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
+        .list-row span { display: flex; align-items: center; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 15px; }
+
         [contenteditable="true"]:focus { outline: none; background: #fffcf5; border-bottom: 1px dashed var(--accent-color); }
     </style>
 </head>
@@ -204,7 +211,7 @@
                     { time: '11:00', title: '☕ Devoción Williamsburg HQ (總店)', loc: '69 Grand St' },
                     { time: '13:00', title: '🌉 Domino Park & Waterfront', loc: '15 River St' },
                     { time: '15:30', title: '📸 DUMBO & Brooklyn Bridge (渡輪前往)', loc: 'DUMBO' },
-                    { time: '18:30', title: '🍝 Dinner: Tony\'s Di Napoli (赴約晚餐)', loc: '147 W 43rd St' }
+                    { time: '18:00', title: '🍝 Dinner: Tony\'s Di Napoli (預約晚餐)', loc: '147 W 43rd St' }
                 ],
                 5: [
                     { time: '09:30', title: '🥯 Breakfast: Ess-a-Bagel', loc: '831 3rd Ave' },
