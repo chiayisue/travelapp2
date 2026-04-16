@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sue's Trip</title>
+    <title>Sue's Travel Planner</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Sue's Trip">
-    <link rel="apple-touch-icon" href="https://i.imgur.com/妳的正確圖片ID.png">
-    <link rel="icon" href="https://i.imgur.com/妳的正確圖片ID.png">
+    <link rel="apple-touch-icon" href="https://i.imgur.com/rRmXupF.jpeg">
+    <link rel="icon" href="https://i.imgur.com/rRmXupF.jpeg">
 
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
@@ -17,7 +17,12 @@
         
         #index-page { padding: 20px; display: block; padding-bottom: 100px; animation: fadeIn 0.3s; }
         .page-title { font-size: 1.8rem; margin: 10px 0 20px 0; letter-spacing: 1px; text-align: center;}
-        .trip-card { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; cursor: pointer; display: flex; justify-content: space-between; align-items: center;}
+        
+        /* 旅程卡片樣式：加入刪除按鈕佈局 */
+        .trip-card { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; transition: transform 0.1s;}
+        .trip-card:active { transform: scale(0.98); }
+        .trip-info { flex: 1; cursor: pointer; }
+        .del-trip-btn { color: #ccc; font-size: 1.2rem; padding: 10px; cursor: pointer; border: none; background: none; margin-left: 10px; }
         
         #trip-container { display: none; padding-bottom: 90px; }
         .trip-header { padding: 20px 20px 10px 20px; display: flex; justify-content: space-between; align-items: flex-start; position: sticky; top: 0; background-color: var(--bg-color); z-index: 90; }
@@ -55,37 +60,33 @@
         
         .card { background: var(--card-bg); border-radius: 12px; padding: 18px; margin-bottom: 15px; border: 1px solid #f0f0f0; }
         
-        /* 🔥 CSS 修正：嚴格限定只有這三種輸入框會變 100% 寬 🔥 */
-        input[type="text"], input[type="number"], select { flex: 1; width: 100%; padding: 12px; border: 1px solid var(--light-gray); border-radius: 8px; font-size: 16px; box-sizing: border-box; background-color: #fff; }
-        
-        /* 🔥 CSS 修正：給 Checkbox 獨立的正常尺寸，並固定位置 🔥 */
+        input[type="text"], input[type="number"], input[type="date"], select { flex: 1; width: 100%; padding: 12px; border: 1px solid var(--light-gray); border-radius: 8px; font-size: 16px; box-sizing: border-box; background-color: #fff; }
         input[type="checkbox"] { width: 22px; height: 22px; margin: 0 12px 0 0; flex: none; cursor: pointer; accent-color: var(--accent-color); }
         
         .add-btn { background: var(--accent-color); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; white-space: nowrap; }
         
         .del-item-btn { border: none; background: none; color: #ddd; font-size: 1.2rem; cursor: pointer; padding: 5px; }
         .list-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
-        
-        /* 🔥 CSS 修正：讓 checkbox 跟文字可以完美的待在同一行垂直置中 🔥 */
         .list-row span { display: flex; align-items: center; flex: 1; font-size: 16px; }
 
         [contenteditable="true"]:focus { outline: none; background: #fffcf5; border-bottom: 1px dashed var(--accent-color); }
-        
         .sync-indicator { font-size: 11px; color: #999; text-align: center; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <div id="index-page">
-    <h1 class="page-title">✈️ 我的紐約旅程</h1>
-    <div class="sync-indicator" id="sync-status">連線中，驗證 DB 狀態...</div>
-
-    <div class="card" style="margin-bottom: 20px;">
-        <input type="text" id="new-trip-title" placeholder="旅程名稱 (如: 🇯🇵 東京夏季之旅)">
-        <input type="date" id="new-trip-date" style="margin-top: 10px;">
-        <button class="add-btn" onclick="addNewTrip()" style="width: 100%; margin-top: 10px;">＋ 建立新旅程</button>
-    </div>
+    <h1 class="page-title">Sue's 旅遊小幫手</h1>
+    <div class="sync-indicator" id="sync-status">連線中...</div>
+    
     <div id="trip-list"></div>
+
+    <div class="card" style="margin-top: 30px; border: 1px dashed var(--accent-color);">
+        <div style="font-weight: bold; color: var(--accent-color); margin-bottom: 10px;">＋ 規劃新旅程</div>
+        <input type="text" id="new-trip-title" placeholder="旅程名稱 (如: 🇯🇵 東京之旅)">
+        <input type="date" id="new-trip-date" style="margin-top: 10px;">
+        <button class="add-btn" onclick="addNewTrip()" style="width: 100%; margin-top: 10px;">建立旅程</button>
+    </div>
 </div>
 
 <div id="trip-container">
@@ -139,7 +140,11 @@
 
         <h3 style="color: var(--accent-color);">🧳 行李檢查</h3>
         <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;">
-            <select id="pack-cat"><option value="必備文件">必備文件</option><option value="電子產品">電子產品</option><option value="衣物配件">衣物配件</option></select>
+            <select id="pack-cat">
+                <option value="必備文件">必備文件</option>
+                <option value="電子產品">電子產品</option>
+                <option value="衣物配件">衣物配件</option>
+                <option value="其他">其他</option> </select>
             <div style="display:flex; gap:10px;"><input type="text" id="pack-input" placeholder="要帶什麼？"><button class="add-btn" onclick="addListObj('packing', 'pack-input', 'pack-cat')">新增</button></div>
         </div>
         <div class="card" id="packing-list-container"></div>
@@ -160,7 +165,7 @@
             </div>
             <div style="text-align: right; margin-top:15px; color: #666;">≈ <span id="twd-result" style="color: var(--accent-color); font-size: 1.8rem; font-weight: bold;">0</span> 台幣</div>
         </div>
-    </div>   
+    </div>
 
     <nav>
         <div class="nav-item active" onclick="switchMainTab('tab-itinerary', this)"><span class="nav-icon">📍</span>行程</div>
@@ -176,7 +181,6 @@
     let currentDates = [];
     let sortableInstance = null;
     
-    // 完全依靠 DB 的空殼架構
     let appData = {
         lastOpenTrip: null,
         hotelAddress: "載入中...",
@@ -203,71 +207,61 @@
 
     async function loadData() {
         const st = document.getElementById('sync-status');
-        if(st) st.innerText = "載入雲端資料中...";
-
+        if(st) st.innerText = "載入中...";
         try {
             const res = await fetch('/api/db');
             if (res.ok) {
                 const cloudData = await res.json();
-                if (cloudData && cloudData.trips && cloudData.trips.length > 0) {
+                if (cloudData && cloudData.trips) {
                     appData = cloudData;
                     if(st) st.innerText = "雲端已同步 ✓";
-                } else {
-                    if(st) st.innerText = "資料庫是空的！請先執行 SQL Insert";
                 }
-            } else {
-                if(st) st.innerText = "無法取得資料庫回應 (API 錯誤)";
             }
-        } catch (e) {
-            console.error("連線錯誤", e);
-            if(st) st.innerText = "連線失敗";
-        }
-
+        } catch (e) { console.error("Load failed", e); }
         renderTrips();
-        const hotelDiv = document.getElementById('hotel-address');
-        if (hotelDiv && appData.hotelAddress) hotelDiv.innerText = appData.hotelAddress;
-        
-        if(appData.lastOpenTrip && appData.trips.length > 0) {
-            openTrip(appData.lastOpenTrip, appData.trips[0].startDate);
+        if (appData.hotelAddress && document.getElementById('hotel-address')) {
+            document.getElementById('hotel-address').innerText = appData.hotelAddress;
+        }
+        if(appData.lastOpenTrip) openTrip(appData.lastOpenTrip, appData.trips.find(t=>t.title===appData.lastOpenTrip)?.startDate || '2026-04-20');
+    }
+
+    // 3. 恢復刪除選項
+    function renderTrips() {
+        const list = document.getElementById('trip-list'); list.innerHTML = '';
+        appData.trips.forEach((trip, idx) => {
+            list.innerHTML += `
+                <div class="trip-card">
+                    <div class="trip-info" onclick="openTrip('${trip.title}', '${trip.startDate}')">
+                        <h2 style="margin:0;">${trip.title}</h2>
+                        <p style="margin:5px 0 0 0; font-size:0.8rem; color:#888;">${trip.startDate} 出發</p>
+                    </div>
+                    <button class="del-trip-btn" onclick="deleteTrip(${idx})">🗑️</button>
+                </div>`;
+        });
+    }
+
+    async function deleteTrip(idx) {
+        if(confirm(`確定要刪除「${appData.trips[idx].title}」嗎？這會連同行程也一起刪除喔！`)) {
+            const title = appData.trips[idx].title;
+            appData.trips.splice(idx, 1);
+            delete appData.itineraries[title];
+            delete appData.summaries[title];
+            await saveData();
+            renderTrips();
         }
     }
 
     async function addNewTrip() {
         const title = document.getElementById('new-trip-title').value;
         const date = document.getElementById('new-trip-date').value;
-        
-        if(!title || !date) return alert("請輸入名稱與日期");
-
-        // 在清單中加入新旅程
-        appData.trips.push({ title: title, startDate: date });
-        
-        // 初始化該旅程的空資料
-        if(!appData.summaries) appData.summaries = {};
-        if(!appData.itineraries) appData.itineraries = {};
-        appData.summaries[title] = {};
+        if(!title || !date) return alert("請輸入旅程名稱與出發日期");
+        appData.trips.push({ title, startDate: date });
         appData.itineraries[title] = {};
-
-        // 存入雲端並重新整理畫面
+        appData.summaries[title] = {};
         await saveData();
         renderTrips();
-        
-        // 清空輸入框
         document.getElementById('new-trip-title').value = '';
         document.getElementById('new-trip-date').value = '';
-    }
-    
-    function saveSummary() {
-        const d = document.querySelector('.date-tab.active').innerText.match(/\d+/)[0];
-        if(!appData.summaries[activeTripTitle]) appData.summaries[activeTripTitle] = {};
-        appData.summaries[activeTripTitle][d] = document.getElementById('board-summary').innerText;
-        saveData();
-    }
-
-    function renderTrips() {
-        const list = document.getElementById('trip-list'); list.innerHTML = '';
-        appData.trips.forEach(trip => {
-            list.innerHTML += `<div class="trip-card" onclick="openTrip('${trip.title}', '${trip.startDate}')"><div class="trip-info"><h2>${trip.title}</h2><p>出發日期: ${trip.startDate}</p></div><span>❯</span></div>`;
-        });
     }
 
     function openTrip(title, startDate) {
@@ -297,13 +291,7 @@
     function switchDate(dayNum, element) {
         document.querySelectorAll('.date-tab').forEach(t => t.classList.remove('active')); if(element) element.classList.add('active');
         document.getElementById('board-date').innerText = `Day ${dayNum} (${currentDates[dayNum-1]})`;
-        
-        let summaryText = "點擊輸入今日重點...";
-        if(appData.summaries[activeTripTitle] && appData.summaries[activeTripTitle][dayNum]) {
-            summaryText = appData.summaries[activeTripTitle][dayNum];
-        }
-        document.getElementById('board-summary').innerText = summaryText;
-        
+        document.getElementById('board-summary').innerText = (appData.summaries[activeTripTitle] && appData.summaries[activeTripTitle][dayNum]) || "點擊輸入今日重點...";
         renderItinerary(dayNum);
         if(weatherForecast[dayNum-1]) {
             document.getElementById('board-temp').innerText = `${weatherForecast[dayNum-1].min}°~${weatherForecast[dayNum-1].max}°`;
@@ -316,16 +304,17 @@
         if(!appData.itineraries[activeTripTitle]) return;
         const events = appData.itineraries[activeTripTitle][dayNum] || [];
         events.forEach((ev, idx) => {
-            container.innerHTML += `<div class="timeline-card" data-idx="${idx}">
-                <div class="drag-handle">⋮⋮</div>
-                <div class="time-col"><input type="time" class="time-input" value="${ev.time}" onchange="updateEv(${dayNum}, ${idx}, 'time', this.value)"></div>
-                <div class="event-col">
-                    <div class="event-title" contenteditable="true" onblur="updateEv(${dayNum}, ${idx}, 'title', this.innerText)">${ev.title}</div>
-                    <div class="loc-text" contenteditable="true" onblur="updateEv(${dayNum}, ${idx}, 'loc', this.innerText)">${ev.loc}</div>
-                    <button class="map-link-btn" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ev.loc)}','_blank')">🗺️ Google Maps</button>
-                </div>
-                <button onclick="delEv(${dayNum}, ${idx})" style="position:absolute; right:10px; top:15px; border:none; background:none; color:#ddd;">×</button>
-            </div>`;
+            container.innerHTML += `
+                <div class="timeline-card" data-idx="${idx}">
+                    <div class="drag-handle">⋮⋮</div>
+                    <div class="time-col"><input type="time" class="time-input" value="${ev.time}" onchange="updateEv(${dayNum}, ${idx}, 'time', this.value)"></div>
+                    <div class="event-col">
+                        <div class="event-title" contenteditable="true" onblur="updateEv(${dayNum}, ${idx}, 'title', this.innerText)">${ev.title}</div>
+                        <div class="loc-text" contenteditable="true" onblur="updateEv(${dayNum}, ${idx}, 'loc', this.innerText)">${ev.loc}</div>
+                        <button class="map-link-btn" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ev.loc)}','_blank')">🗺️ Google Maps</button>
+                    </div>
+                    <button onclick="delEv(${dayNum}, ${idx})" style="position:absolute; right:10px; top:15px; border:none; background:none; color:#ddd;">×</button>
+                </div>`;
         });
         initSortable(dayNum);
     }
@@ -342,7 +331,6 @@
     function delEv(d, i) { if(confirm('確定刪除？')) { appData.itineraries[activeTripTitle][d].splice(i, 1); saveData(); renderItinerary(d); } }
     function addItineraryEvent() { 
         const d = document.querySelector('.date-tab.active').innerText.match(/\d+/)[0];
-        if(!appData.itineraries[activeTripTitle]) appData.itineraries[activeTripTitle] = {};
         if(!appData.itineraries[activeTripTitle][d]) appData.itineraries[activeTripTitle][d] = [];
         appData.itineraries[activeTripTitle][d].push({ time: '12:00', title: '新行程', loc: '地點' }); 
         saveData(); renderItinerary(d); 
@@ -390,13 +378,12 @@
     }
     function delListObj(type, idx) { if(confirm('確定刪除項目？')) { appData[type].splice(idx, 1); saveData(); renderLists(); } }
     function toggleCheck(t, i) { appData[t][i].checked = !appData[t][i].checked; saveData(); renderLists(); }
-
+    function saveSummary() { const d = document.querySelector('.date-tab.active').innerText.match(/\d+/)[0]; if(!appData.summaries[activeTripTitle]) appData.summaries[activeTripTitle] = {}; appData.summaries[activeTripTitle][d] = document.getElementById('board-summary').innerText; saveData(); }
     function switchMainTab(id, el) { document.querySelectorAll('.main-tab-content').forEach(c => c.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.getElementById(id).classList.add('active'); el.classList.add('active'); }
     function calcExchange() { const v = document.getElementById('usd-input').value; document.getElementById('twd-result').innerText = v ? Math.round(v * 32.2).toLocaleString() : '0'; }
     function saveHotelAddress() { appData.hotelAddress = document.getElementById('hotel-address').innerText; saveData(); }
     function openHotelMap() { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(appData.hotelAddress)}`, '_blank'); }
 
-    // 啟動點
     loadData();
 </script>
 </body>
