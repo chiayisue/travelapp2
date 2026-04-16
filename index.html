@@ -79,6 +79,12 @@
 <div id="index-page">
     <h1 class="page-title">✈️ 我的紐約旅程</h1>
     <div class="sync-indicator" id="sync-status">連線中，驗證 DB 狀態...</div>
+
+    <div class="card" style="margin-bottom: 20px;">
+        <input type="text" id="new-trip-title" placeholder="旅程名稱 (如: 🇯🇵 東京夏季之旅)">
+        <input type="date" id="new-trip-date" style="margin-top: 10px;">
+        <button class="add-btn" onclick="addNewTrip()" style="width: 100%; margin-top: 10px;">＋ 建立新旅程</button>
+    </div>
     <div id="trip-list"></div>
 </div>
 
