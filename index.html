@@ -55,11 +55,20 @@
         
         .card { background: var(--card-bg); border-radius: 12px; padding: 18px; margin-bottom: 15px; border: 1px solid #f0f0f0; }
         
-        input, select { flex: 1; width: 100%; padding: 12px; border: 1px solid var(--light-gray); border-radius: 8px; font-size: 16px; box-sizing: border-box; background-color: #fff; }
+        /* 🔥 CSS 修正：嚴格限定只有這三種輸入框會變 100% 寬 🔥 */
+        input[type="text"], input[type="number"], select { flex: 1; width: 100%; padding: 12px; border: 1px solid var(--light-gray); border-radius: 8px; font-size: 16px; box-sizing: border-box; background-color: #fff; }
+        
+        /* 🔥 CSS 修正：給 Checkbox 獨立的正常尺寸，並固定位置 🔥 */
+        input[type="checkbox"] { width: 22px; height: 22px; margin: 0 12px 0 0; flex: none; cursor: pointer; accent-color: var(--accent-color); }
+        
         .add-btn { background: var(--accent-color); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; white-space: nowrap; }
         
         .del-item-btn { border: none; background: none; color: #ddd; font-size: 1.2rem; cursor: pointer; padding: 5px; }
         .list-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+        
+        /* 🔥 CSS 修正：讓 checkbox 跟文字可以完美的待在同一行垂直置中 🔥 */
+        .list-row span { display: flex; align-items: center; flex: 1; font-size: 16px; }
+
         [contenteditable="true"]:focus { outline: none; background: #fffcf5; border-bottom: 1px dashed var(--accent-color); }
         
         .sync-indicator { font-size: 11px; color: #999; text-align: center; margin-bottom: 10px; }
@@ -161,7 +170,7 @@
     let currentDates = [];
     let sortableInstance = null;
     
-    // ⚠️ 空殼狀態：裡面完全沒有行程。如果 UI 出現內容，證明 100% 來自資料庫！
+    // 完全依靠 DB 的空殼架構
     let appData = {
         lastOpenTrip: null,
         hotelAddress: "載入中...",
@@ -194,7 +203,6 @@
             const res = await fetch('/api/db');
             if (res.ok) {
                 const cloudData = await res.json();
-                // 只要雲端有拿回來結構，就直接覆蓋這個空殼
                 if (cloudData && cloudData.trips && cloudData.trips.length > 0) {
                     appData = cloudData;
                     if(st) st.innerText = "雲端已同步 ✓";
@@ -358,7 +366,7 @@
     function saveHotelAddress() { appData.hotelAddress = document.getElementById('hotel-address').innerText; saveData(); }
     function openHotelMap() { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(appData.hotelAddress)}`, '_blank'); }
 
-    // 開始讀取 DB！
+    // 啟動點
     loadData();
 </script>
 </body>
