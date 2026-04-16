@@ -232,6 +232,30 @@
         }
     }
 
+    async function addNewTrip() {
+        const title = document.getElementById('new-trip-title').value;
+        const date = document.getElementById('new-trip-date').value;
+        
+        if(!title || !date) return alert("請輸入名稱與日期");
+
+        // 在清單中加入新旅程
+        appData.trips.push({ title: title, startDate: date });
+        
+        // 初始化該旅程的空資料
+        if(!appData.summaries) appData.summaries = {};
+        if(!appData.itineraries) appData.itineraries = {};
+        appData.summaries[title] = {};
+        appData.itineraries[title] = {};
+
+        // 存入雲端並重新整理畫面
+        await saveData();
+        renderTrips();
+        
+        // 清空輸入框
+        document.getElementById('new-trip-title').value = '';
+        document.getElementById('new-trip-date').value = '';
+    }
+    
     function saveSummary() {
         const d = document.querySelector('.date-tab.active').innerText.match(/\d+/)[0];
         if(!appData.summaries[activeTripTitle]) appData.summaries[activeTripTitle] = {};
@@ -374,46 +398,6 @@
 
     // 啟動點
     loadData();
-    <script>
-    let activeTripTitle = '';
-    let weatherForecast = [];
-    // ... 其他變數
-
-    async function saveData() { ... }
-    
-    async function loadData() { ... }
-
-    // 🌟 新增：把邏輯代碼貼在這裡 👇
-    async function addNewTrip() {
-        const title = document.getElementById('new-trip-title').value;
-        const date = document.getElementById('new-trip-date').value;
-        
-        if(!title || !date) return alert("請輸入名稱與日期");
-
-        // 在清單中加入新旅程
-        appData.trips.push({ title: title, startDate: date });
-        
-        // 初始化該旅程的空資料
-        if(!appData.summaries) appData.summaries = {};
-        if(!appData.itineraries) appData.itineraries = {};
-        appData.summaries[title] = {};
-        appData.itineraries[title] = {};
-
-        // 存入雲端並重新整理畫面
-        await saveData();
-        renderTrips();
-        
-        // 清空輸入框
-        document.getElementById('new-trip-title').value = '';
-        document.getElementById('new-trip-date').value = '';
-    }
-    // 🌟 新增結束 👆
-
-    function saveSummary() { ... }
-    // ... 下面是其他原本的功能
-</script>
-</body>
-</html>
 </script>
 </body>
 </html>
