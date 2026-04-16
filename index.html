@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
     <title>Sue's Trip</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -17,7 +16,7 @@
         body { margin: 0; padding: 0; font-family: "PingFang TC", "Noto Sans TC", -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; overscroll-behavior-y: none; }
         
         #index-page { padding: 20px; display: block; padding-bottom: 100px; animation: fadeIn 0.3s; }
-        .page-title { font-size: 1.8rem; margin: 10px 0 20px 0; letter-spacing: 1px; }
+        .page-title { font-size: 1.8rem; margin: 10px 0 20px 0; letter-spacing: 1px; text-align: center;}
         .trip-card { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; cursor: pointer; display: flex; justify-content: space-between; align-items: center;}
         
         #trip-container { display: none; padding-bottom: 90px; }
@@ -56,30 +55,21 @@
         
         .card { background: var(--card-bg); border-radius: 12px; padding: 18px; margin-bottom: 15px; border: 1px solid #f0f0f0; }
         
-        /* 🔥 加大輸入框與按鈕尺寸 🔥 */
-        input[type="text"], input[type="number"], select { flex: 1; width: 100%; padding: 16px 14px; border: 1px solid var(--light-gray); border-radius: 10px; font-size: 16px; min-height: 50px; box-sizing: border-box; background-color: #fff; }
-        
-        /* 🔥 勾選框獨立縮小並確保同一行 🔥 */
-        input[type="checkbox"] { width: 22px; height: 22px; min-height: auto; margin: 0 10px 0 0; flex: none; cursor: pointer; }
-        .add-btn { background: var(--accent-color); color: white; border: none; padding: 16px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; min-height: 50px; white-space: nowrap; }
+        input, select { flex: 1; width: 100%; padding: 12px; border: 1px solid var(--light-gray); border-radius: 8px; font-size: 16px; box-sizing: border-box; background-color: #fff; }
+        .add-btn { background: var(--accent-color); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; white-space: nowrap; }
         
         .del-item-btn { border: none; background: none; color: #ddd; font-size: 1.2rem; cursor: pointer; padding: 5px; }
-        
-        /* 🔥 確保清單文字不會折行 🔥 */
-        .list-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
-        .list-row span { display: flex; align-items: center; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 15px; }
-
-        /* 雲端狀態提示 */
-        .sync-indicator { font-size: 11px; color: #888; text-align: center; margin-bottom: 10px; }
-
+        .list-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
         [contenteditable="true"]:focus { outline: none; background: #fffcf5; border-bottom: 1px dashed var(--accent-color); }
+        
+        .sync-indicator { font-size: 11px; color: #999; text-align: center; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <div id="index-page">
     <h1 class="page-title">✈️ 我的紐約旅程</h1>
-    <div class="sync-indicator" id="sync-status">雲端同步中...</div>
+    <div class="sync-indicator" id="sync-status">連線中，驗證 DB 狀態...</div>
     <div id="trip-list"></div>
 </div>
 
@@ -144,7 +134,7 @@
         <h3 style="color: var(--accent-color);">🧰 旅行助手</h3>
         <div class="card">
             <strong>🏨 飯店地址</strong>
-            <div contenteditable="true" id="hotel-address" style="margin: 15px 0; font-weight: bold;" onblur="saveHotelAddress()">127 E 30th St, New York, NY 10016</div>
+            <div contenteditable="true" id="hotel-address" style="margin: 15px 0; font-weight: bold;" onblur="saveHotelAddress()">載入中...</div>
             <button onclick="openHotelMap()" style="width:100%; padding:12px; border:none; border-radius:10px; background:#e8f0fe; color:#1a73e8; font-weight:bold;">在 Google Maps 開啟</button>
         </div>
         <div class="card">
@@ -170,17 +160,18 @@
     let weatherForecast = [];
     let currentDates = [];
     let sortableInstance = null;
+    
+    // ⚠️ 空殼狀態：裡面完全沒有行程。如果 UI 出現內容，證明 100% 來自資料庫！
     let appData = {
         lastOpenTrip: null,
-        hotelAddress: "127 E 30th St, New York, NY 10016",
-        trips: [{ title: '🇺🇸 紐約春季之旅 2026', startDate: '2026-04-20' }],
+        hotelAddress: "載入中...",
+        trips: [],
         summaries: {},
         shopping: [], packing: [], expenses: [],
         itineraries: {}
     };
 
-    // 🌟 外科手術 1：改用 API 寫入雲端
-    async function saveData() { 
+    async function saveData() {
         const st = document.getElementById('sync-status');
         if(st) st.innerText = "同步中...";
         try {
@@ -195,78 +186,36 @@
         }
     }
 
-    // 🌟 外科手術 2：改用 API 讀取，並加入「格式損壞自動修復」
     async function loadData() {
         const st = document.getElementById('sync-status');
         if(st) st.innerText = "載入雲端資料中...";
-        let hasValidData = false;
 
         try {
             const res = await fetch('/api/db');
             if (res.ok) {
                 const cloudData = await res.json();
-                // 防呆：確認雲端抓下來的資料是不是這版 UI 看得懂的格式
-                if (cloudData && cloudData.itineraries && cloudData.itineraries['🇺🇸 紐約春季之旅 2026']) {
+                // 只要雲端有拿回來結構，就直接覆蓋這個空殼
+                if (cloudData && cloudData.trips && cloudData.trips.length > 0) {
                     appData = cloudData;
-                    hasValidData = true;
+                    if(st) st.innerText = "雲端已同步 ✓";
+                } else {
+                    if(st) st.innerText = "資料庫是空的！請先執行 SQL Insert";
                 }
+            } else {
+                if(st) st.innerText = "無法取得資料庫回應 (API 錯誤)";
             }
-        } catch (e) { console.error("連線錯誤", e); }
-
-        // 如果雲端沒資料，或是被之前的 SQL 弄壞了格式，強制注入這套完美的預設值並覆蓋雲端！
-        if (!hasValidData) {
-            console.log("偵測到格式錯誤或無資料，啟動自動修復程序...");
-            appData.summaries['🇺🇸 紐約春季之旅 2026'] = {
-                1: "抵達紐約與飯店入住",
-                2: "下城區歷史、建築攝影與夕陽",
-                3: "上東區藝術、中央公園與百老匯",
-                4: "Williamsburg 文青深度一日遊",
-                5: "曼哈頓西側告別：High Line 與歸途"
-            };
-            appData.itineraries['🇺🇸 紐約春季之旅 2026'] = {
-                1: [{ time: '21:53', title: '✈️ Flight Departure (SFO)', loc: 'SFO' }],
-                2: [
-                    { time: '06:30', title: '🛬 Flight Arrival (NYC)', loc: 'NYC' },
-                    { time: '08:30', title: '🏨 Hotel Luggage Drop-off', loc: '127 E 30th St' },
-                    { time: '09:15', title: '🥯 Breakfast: Best Bagel & Coffee', loc: '225 W 35th St' },
-                    { time: '11:00', title: '☕ Coffee: Stumptown Coffee', loc: '18 W 29th St' },
-                    { time: '13:00', title: '🏛️ 9/11 Memorial & Museum', loc: '180 Greenwich St' },
-                    { time: '16:30', title: '🕊️ Oculus & Sunset View', loc: 'Brookfield Place' },
-                    { time: '19:30', title: '🥣 Dinner: OKDONGSIK 豬肉湯飯', loc: '13 E 30th St' }
-                ],
-                3: [
-                    { time: '09:00', title: '☕ Coffee: Ground Central (NoMad)', loc: '28 E 28th St' },
-                    { time: '10:30', title: '🎨 The MET Museum (大都會美術館)', loc: '1000 5th Ave' },
-                    { time: '14:00', title: '🌳 Central Park Walk (中央公園漫步)', loc: 'Central Park' },
-                    { time: '15:30', title: '🥤 Bryant Park & Coffee (休息時光)', loc: 'Bryant Park' },
-                    { time: '17:15', title: '🍽️ Dinner: Danji (預約晚餐)', loc: '346 W 52nd St' },
-                    { time: '19:00', title: '🎭 Broadway: The Great Gatsby', loc: 'Broadway Theatre' }
-                ],
-                4: [
-                    { time: '10:00', title: '🚇 Bedford Ave Station (Williamsburg 起點)', loc: 'Bedford Ave' },
-                    { time: '11:00', title: '☕ Devoción Williamsburg HQ (總店)', loc: '69 Grand St' },
-                    { time: '13:00', title: '🌉 Domino Park & Waterfront', loc: '15 River St' },
-                    { time: '15:30', title: '📸 DUMBO & Brooklyn Bridge (渡輪前往)', loc: 'DUMBO' },
-                    { time: '18:00', title: '🍝 Dinner: Tony\'s Di Napoli (預約晚餐)', loc: '147 W 43rd St' }
-                ],
-                5: [
-                    { time: '09:30', title: '🥯 Breakfast: Ess-a-Bagel', loc: '831 3rd Ave' },
-                    { time: '11:00', title: '🚶 High Line & Chelsea Market', loc: '75 9th Ave' },
-                    { time: '13:30', title: '🌇 West Village Exploration', loc: 'West Village' },
-                    { time: '15:30', title: '🧳 Pick up Luggage (回飯店拿行李)', loc: '127 E 30th St' },
-                    { time: '18:23', title: '✈️ Flight Departure (回程航班出發)', loc: 'EWR' }
-                ]
-            };
-            appData.shopping = [{ text: '任天堂紐約旗艦店皮卡丘玩偶', checked: false }];
-            
-            // 立即推上雲端，修復資料庫
-            saveData(); 
-        } else {
-            if(st) st.innerText = "雲端已同步 ✓";
+        } catch (e) {
+            console.error("連線錯誤", e);
+            if(st) st.innerText = "連線失敗";
         }
 
         renderTrips();
-        if(appData.lastOpenTrip) openTrip(appData.lastOpenTrip, appData.trips[0].startDate);
+        const hotelDiv = document.getElementById('hotel-address');
+        if (hotelDiv && appData.hotelAddress) hotelDiv.innerText = appData.hotelAddress;
+        
+        if(appData.lastOpenTrip && appData.trips.length > 0) {
+            openTrip(appData.lastOpenTrip, appData.trips[0].startDate);
+        }
     }
 
     function saveSummary() {
@@ -304,13 +253,19 @@
             currentDates.push(displayDate);
             container.innerHTML += `<div class="date-tab" onclick="switchDate(${i+1}, this)"><div style="font-size:0.8rem; font-weight:bold;">Day ${i+1}</div><div>${displayDate}</div><div style="font-size:0.6rem;">(${weekdays[current.getDay()]})</div></div>`;
         }
-        switchDate(1, container.children[0]);
+        if(container.children.length > 0) switchDate(1, container.children[0]);
     }
 
     function switchDate(dayNum, element) {
         document.querySelectorAll('.date-tab').forEach(t => t.classList.remove('active')); if(element) element.classList.add('active');
         document.getElementById('board-date').innerText = `Day ${dayNum} (${currentDates[dayNum-1]})`;
-        document.getElementById('board-summary').innerText = (appData.summaries[activeTripTitle] && appData.summaries[activeTripTitle][dayNum]) || "點擊輸入今日重點...";
+        
+        let summaryText = "點擊輸入今日重點...";
+        if(appData.summaries[activeTripTitle] && appData.summaries[activeTripTitle][dayNum]) {
+            summaryText = appData.summaries[activeTripTitle][dayNum];
+        }
+        document.getElementById('board-summary').innerText = summaryText;
+        
         renderItinerary(dayNum);
         if(weatherForecast[dayNum-1]) {
             document.getElementById('board-temp').innerText = `${weatherForecast[dayNum-1].min}°~${weatherForecast[dayNum-1].max}°`;
@@ -320,6 +275,7 @@
 
     function renderItinerary(dayNum) {
         const container = document.getElementById('itinerary-list'); container.innerHTML = '';
+        if(!appData.itineraries[activeTripTitle]) return;
         const events = appData.itineraries[activeTripTitle][dayNum] || [];
         events.forEach((ev, idx) => {
             container.innerHTML += `<div class="timeline-card" data-idx="${idx}">
@@ -348,6 +304,7 @@
     function delEv(d, i) { if(confirm('確定刪除？')) { appData.itineraries[activeTripTitle][d].splice(i, 1); saveData(); renderItinerary(d); } }
     function addItineraryEvent() { 
         const d = document.querySelector('.date-tab.active').innerText.match(/\d+/)[0];
+        if(!appData.itineraries[activeTripTitle]) appData.itineraries[activeTripTitle] = {};
         if(!appData.itineraries[activeTripTitle][d]) appData.itineraries[activeTripTitle][d] = [];
         appData.itineraries[activeTripTitle][d].push({ time: '12:00', title: '新行程', loc: '地點' }); 
         saveData(); renderItinerary(d); 
@@ -401,8 +358,8 @@
     function saveHotelAddress() { appData.hotelAddress = document.getElementById('hotel-address').innerText; saveData(); }
     function openHotelMap() { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(appData.hotelAddress)}`, '_blank'); }
 
-    // 🚀 啟動點：改為呼叫支援 API 的 loadData
-    loadData(); 
+    // 開始讀取 DB！
+    loadData();
 </script>
 </body>
 </html>
