@@ -12,54 +12,56 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
         :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; }
-        body { margin: 0; font-family: sans-serif; background-color: var(--bg-color); color: var(--text-color); }
-        #index-page, #trip-container { padding: 20px; padding-bottom: 100px; }
-        .trip-card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 15px; border: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; border-top: 1px solid #eee; padding-bottom: env(safe-area-inset-bottom); z-index: 100; }
-        .nav-item { flex: 1; text-align: center; padding: 12px; font-size: 0.75rem; color: #999; }
+        body { margin: 0; font-family: -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; }
+        #index-page, #trip-container { padding: 20px; padding-bottom: 120px; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .trip-card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 15px; border: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; border-top: 1px solid var(--light-gray); padding-bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .nav-item { flex: 1; text-align: center; font-size: 0.75rem; color: #999; padding: 10px 0; cursor: pointer; }
         .nav-item.active { color: var(--accent-color); font-weight: bold; }
+        .nav-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
         .main-tab-content { display: none; }
         .main-tab-content.active { display: block; }
-        .date-tabs { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 15px; }
-        .date-tab { min-width: 60px; text-align: center; padding: 10px; background: #fff; border-radius: 12px; border: 1px solid #eee; }
+        .date-tabs { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 15px; margin: 0 -20px; padding-left: 20px; }
+        .date-tab { min-width: 65px; text-align: center; padding: 10px; background: #fff; border-radius: 14px; border: 1px solid #eee; }
         .date-tab.active { background: var(--accent-color); color: #fff; }
-        .timeline-card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid #eee; display: flex; gap: 10px; position: relative; }
-        
-        /* 加大輸入框尺寸 */
-        input[type="text"], input[type="number"], select { flex: 1; padding: 16px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; min-height: 50px; }
-        .add-btn { background: var(--accent-color); color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; min-height: 50px; font-size: 16px; }
-        
-        /* Checkbox 比例修正：同一行且大小適中 */
+        .timeline-card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 12px; border: 1px solid #f0f0f0; display: flex; gap: 15px; position: relative; }
+        input[type="text"], input[type="number"], select { flex: 1; padding: 16px; border: 1px solid var(--light-gray); border-radius: 10px; font-size: 16px; min-height: 50px; box-sizing: border-box; }
+        .add-btn { background: var(--accent-color); color: #fff; border: none; padding: 16px 20px; border-radius: 10px; font-weight: bold; font-size: 16px; min-height: 50px; }
         .list-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
-        .list-row span { display: flex; align-items: center; flex: 1; font-size: 16px; }
-        input[type="checkbox"] { width: 22px; height: 22px; margin-right: 12px; flex-shrink: 0; }
-        
-        .sync-indicator { font-size: 10px; color: #bbb; text-align: center; margin-bottom: 10px; }
+        input[type="checkbox"] { width: 24px; height: 24px; margin-right: 12px; }
+        .card { background: #fff; border-radius: 12px; padding: 18px; margin-bottom: 15px; border: 1px solid #f0f0f0; }
+        .sync-indicator { font-size: 10px; color: #bbb; text-align: center; position: fixed; top: 10px; width: 100%; z-index: 80; }
     </style>
 </head>
 <body>
 
 <div id="index-page">
-    <h1 style="font-size: 1.8rem;">✈️ 我的紐約旅程</h1>
+    <h1 style="text-align: center;">✈️ 我的紐約旅程</h1>
     <div class="sync-indicator" id="sync-status">雲端同步中...</div>
-    <div id="trip-list"></div>
+    <div id="trip-list" style="margin-top: 40px;"></div>
 </div>
 
 <div id="trip-container" style="display:none;">
     <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <div><h1 id="top-title" style="margin:0; font-size:1.2rem;"></h1></div>
-        <button onclick="goHome()" style="background:none; border:1px solid #ddd; padding:5px 10px; border-radius:20px;">返回</button>
+        <div><h1 id="top-title" style="margin:0; font-size:1.4rem;">載入中...</h1></div>
+        <button onclick="goHome()" style="background:#fff; border:1px solid #ddd; padding:8px 15px; border-radius:20px; color:var(--accent-color);">❮ 返回</button>
     </header>
 
     <div id="tab-itinerary" class="main-tab-content active">
         <div class="date-tabs" id="dynamic-date-tabs"></div>
         <div id="itinerary-list"></div>
+        <button onclick="addItineraryEvent()" style="width:100%; padding:15px; border:1px dashed var(--accent-color); background:none; color:var(--accent-color); border-radius:12px; font-weight:bold; margin-top:10px;">+ 新增行程</button>
     </div>
 
     <div id="tab-expenses" class="main-tab-content">
-        <h3>💰 旅途記帳 (跨裝置同步)</h3>
-        <div style="display:flex; flex-direction:column; gap:10px;">
-            <input type="text" id="exp-name" placeholder="項目...">
+        <h3>💰 旅途記帳 (雲端同步)</h3>
+        <div class="card" style="text-align: center;">
+            <div style="font-size: 0.8rem; color: #888;">目前總花費 (約合台幣)</div>
+            <div style="font-size: 2.2rem; font-weight: bold; color: var(--accent-color);">NT$ <span id="total-twd">0</span></div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:20px;">
+            <input type="text" id="exp-name" placeholder="項目名稱...">
             <div style="display:flex; gap:10px;">
                 <input type="number" id="exp-amount" placeholder="金額 (USD)">
                 <button class="add-btn" onclick="addExpense()">新增</button>
@@ -75,97 +77,172 @@
             <button class="add-btn" onclick="addListObj('shopping', 'shop-input')">新增</button>
         </div>
         <div id="shopping-list-container"></div>
+        <h3 style="margin-top:30px;">🧳 行李檢查</h3>
+        <div id="packing-list-container"></div>
+    </div>
+
+    <div id="tab-tools" class="main-tab-content">
+        <h3>🧰 旅行助手</h3>
+        <div class="card">
+            <strong>🏨 飯店地址</strong>
+            <div contenteditable="true" id="hotel-address" style="margin: 15px 0; font-weight: bold; border-bottom:1px dashed #ddd; padding-bottom:10px;" onblur="saveHotelAddress()">載入中...</div>
+            <button onclick="openHotelMap()" style="width:100%; padding:16px; border:none; border-radius:10px; background:#e8f0fe; color:#1a73e8; font-weight:bold;">在 Google Maps 開啟</button>
+        </div>
+        <div class="card">
+            <strong>💰 匯率換算 (1:32.2)</strong>
+            <input type="number" id="usd-input" placeholder="輸入美金 USD" oninput="calcExchange()" style="margin-top:10px;">
+            <div style="text-align: right; margin-top:15px; color: var(--accent-color); font-size: 1.5rem; font-weight: bold;">≈ <span id="twd-result">0</span> 台幣</div>
+        </div>
     </div>
 
     <nav>
-        <div class="nav-item active" onclick="switchMainTab('tab-itinerary', this)">📍行程</div>
-        <div class="nav-item" onclick="switchMainTab('tab-expenses', this)">💰記帳</div>
-        <div class="nav-item" onclick="switchMainTab('tab-lists', this)">🛒清單</div>
+        <div class="nav-item active" onclick="switchMainTab('tab-itinerary', this)"><span class="nav-icon">📍</span>行程</div>
+        <div class="nav-item" onclick="switchMainTab('tab-expenses', this)"><span class="nav-icon">💰</span>記帳</div>
+        <div class="nav-item" onclick="switchMainTab('tab-lists', this)"><span class="nav-icon">🛒</span>清單</div>
+        <div class="nav-item" onclick="switchMainTab('tab-tools', this)"><span class="nav-icon">🧰</span>工具</div>
     </nav>
 </div>
 
 <script>
+    // ✨ 初始架構：現在這只是「籃子」，裡面沒東西，內容會從 Neon 抓
     let appData = {
         trips: [{ title: '🇺🇸 紐約春季之旅 2026', startDate: '2026-04-20' }],
-        expenses: [], shopping: [], 
-        itineraries: {
-            // 預設行程內容 (略，同之前版本，含 Tony's 18:00)
-            4: [{ time: '18:00', title: '🍝 Dinner: Tony\'s Di Napoli', loc: '147 W 43rd St' }],
-            // ... 其餘行程 ...
-        }
+        hotelAddress: "",
+        expenses: [], shopping: [], packing: [], itineraries: {}
     };
 
-    // ✨ 雲端同步核心：存檔
+    // ✨ 雲端核心：存檔
     async function saveData() {
-        document.getElementById('sync-status').innerText = "同步中...";
+        document.getElementById('sync-status').innerText = "正在儲存到雲端...";
         try {
             await fetch('/api/db', {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(appData)
             });
-            document.getElementById('sync-status').innerText = "雲端已同步 ✓";
+            document.getElementById('sync-status').innerText = "雲端同步成功 ✓";
         } catch (e) {
-            document.getElementById('sync-status').innerText = "同步失敗 (離線中)";
+            document.getElementById('sync-status').innerText = "同步失敗，請檢查網路";
         }
     }
 
-    // ✨ 雲端同步核心：讀檔
+    // ✨ 雲端核心：載入 (一打開就讀取 Neon)
     async function loadData() {
+        document.getElementById('sync-status').innerText = "讀取雲端資料中...";
         try {
             const res = await fetch('/api/db');
-            const cloudData = await res.json();
-            if (cloudData) {
-                appData = cloudData;
-                console.log("已載入雲端最新資料");
+            if (res.ok) {
+                const cloudData = await res.json();
+                if (cloudData) {
+                    appData = cloudData;
+                    console.log("雲端資料讀取完成");
+                }
             }
         } catch (e) {
-            console.log("無法連線雲端，使用預設值");
+            console.error("讀取失敗，使用預設值");
         }
+        document.getElementById('sync-status').innerText = "雲端同步成功 ✓";
         renderTrips();
-        document.getElementById('sync-status').innerText = "雲端已同步 ✓";
+        // 渲染各個分頁
+        renderExpenses();
+        renderLists();
+        const hotelDiv = document.getElementById('hotel-address');
+        if (hotelDiv) hotelDiv.innerText = appData.hotelAddress || "請輸入飯店地址";
     }
 
-    // 介面渲染邏輯 (簡化，確保呼叫 saveData)
-    function renderExpenses() {
-        const cont = document.getElementById('expense-list-container');
-        cont.innerHTML = appData.expenses.map((e, i) => `<div class="list-row"><span>${e.name}</span><span>$${e.amt}</span></div>`).join('');
+    // 介面渲染與切換邏輯
+    function renderTrips() {
+        const list = document.getElementById('trip-list');
+        list.innerHTML = appData.trips.map(t => `<div class="trip-card" onclick="openTrip('${t.title}', '${t.startDate}')"><div><h2 style="margin:0;">${t.title}</h2><p style="margin:5px 0 0 0; font-size:0.8rem; color:#888;">${t.startDate} 出發</p></div><span>❯</span></div>`).join('');
     }
 
+    function openTrip(title, startDate) {
+        document.getElementById('index-page').style.display = 'none';
+        document.getElementById('trip-container').style.display = 'block';
+        document.getElementById('top-title').innerText = title;
+        generateDateTabs(startDate);
+    }
+
+    function generateDateTabs(startDateStr) {
+        const container = document.getElementById('dynamic-date-tabs'); container.innerHTML = '';
+        const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        for(let i=0; i<5; i++) {
+            const parts = startDateStr.split('-'), d = new Date(parts[0], parts[1]-1, parts[2]);
+            d.setDate(d.getDate() + i);
+            const mmdd = `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+            container.innerHTML += `<div class="date-tab" onclick="switchDate(${i+1}, this)"><div>Day ${i+1}</div><div style="font-size:0.7rem;">${mmdd}</div><div style="font-size:0.6rem;">(${weekdays[d.getDay()]})</div></div>`;
+        }
+        switchDate(1, container.children[0]);
+    }
+
+    function switchDate(day, el) {
+        document.querySelectorAll('.date-tab').forEach(t => t.classList.remove('active')); el.classList.add('active');
+        renderItinerary(day);
+    }
+
+    function renderItinerary(day) {
+        const list = document.getElementById('itinerary-list'); list.innerHTML = '';
+        const events = appData.itineraries[day] || [];
+        events.forEach((ev, idx) => {
+            list.innerHTML += `<div class="timeline-card">
+                <div style="color:#ccc;">⋮⋮</div>
+                <div style="min-width:60px; font-weight:bold; color:var(--accent-color);">${ev.time}</div>
+                <div style="flex:1;">
+                    <div style="font-weight:bold;">${ev.title}</div>
+                    <div style="font-size:0.8rem; color:#888;">${ev.loc}</div>
+                </div>
+            </div>`;
+        });
+    }
+
+    // 各類新增功能 (皆呼叫 saveData)
     async function addExpense() {
         const n = document.getElementById('exp-name'), a = document.getElementById('exp-amount');
         if(!n.value || !a.value) return;
         appData.expenses.push({ name: n.value, amt: parseFloat(a.value) });
         n.value = ''; a.value = '';
-        renderExpenses();
-        await saveData(); // 存入雲端
+        renderExpenses(); await saveData();
+    }
+
+    function renderExpenses() {
+        const cont = document.getElementById('expense-list-container');
+        let total = 0;
+        cont.innerHTML = appData.expenses.map((e, i) => {
+            total += e.amt;
+            return `<div class="list-row"><span>${e.name}</span><span>$${e.amt}</span></div>`;
+        }).join('');
+        document.getElementById('total-twd').innerText = Math.round(total * 32.2).toLocaleString();
     }
 
     async function addListObj(type, inputId) {
-        const v = document.getElementById(inputId);
-        if(!v.value) return;
+        const v = document.getElementById(inputId); if(!v.value) return;
         appData[type].push({ text: v.value, checked: false });
-        v.value = '';
-        renderLists();
-        await saveData(); // 存入雲端
+        v.value = ''; renderLists(); await saveData();
     }
 
-    function renderTrips() {
-        const list = document.getElementById('trip-list');
-        list.innerHTML = appData.trips.map(t => `<div class="trip-card" onclick="openTrip()">${t.title} ❯</div>`).join('');
+    function renderLists() {
+        document.getElementById('shopping-list-container').innerHTML = appData.shopping.map((item, i) => `<div class="list-row"><span><input type="checkbox" ${item.checked?'checked':''} onchange="toggleCheck('shopping',${i})"> ${item.text}</span></div>`).join('');
     }
 
-    function openTrip() {
-        document.getElementById('index-page').style.display = 'none';
-        document.getElementById('trip-container').style.display = 'block';
-        document.getElementById('top-title').innerText = appData.trips[0].title;
+    async function toggleCheck(type, i) {
+        appData[type][i].checked = !appData[type][i].checked;
+        await saveData();
+    }
+
+    async function saveHotelAddress() {
+        appData.hotelAddress = document.getElementById('hotel-address').innerText;
+        await saveData();
     }
 
     function switchMainTab(id, el) {
         document.querySelectorAll('.main-tab-content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        el.classList.add('active');
+        document.getElementById(id).classList.add('active'); el.classList.add('active');
     }
+
+    function goHome() { document.getElementById('trip-container').style.display = 'none'; document.getElementById('index-page').style.display = 'block'; }
+    function calcExchange() { const v = document.getElementById('usd-input').value; document.getElementById('twd-result').innerText = v ? Math.round(v * 32.2).toLocaleString() : '0'; }
+    function openHotelMap() { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(appData.hotelAddress)}`, '_blank'); }
 
     window.onload = loadData;
 </script>
