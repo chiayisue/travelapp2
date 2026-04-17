@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sue's Travel Planner</title>
+    <title>Bon Voyage</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Sue's Trip">
+    <meta name="apple-mobile-web-app-title" content="Bon Voyage">
     <link rel="apple-touch-icon" href="https://i.imgur.com/rRmXupF.jpeg">
     <link rel="icon" href="https://i.imgur.com/rRmXupF.jpeg">
 
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
-        :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --danger-color: #ff4d4f; }
+        /* 🔥 新增了 --memo-bg 日系淺若草色 🔥 */
+        :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --memo-bg: #f0f3eb; --danger-color: #ff4d4f; }
         body { margin: 0; padding: 0; font-family: "PingFang TC", "Noto Sans TC", -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; overscroll-behavior-y: none; }
         
         #index-page { padding: 20px; display: block; padding-bottom: 100px; animation: fadeIn 0.3s; }
@@ -47,15 +48,17 @@
         .summary-text { font-size: 0.95rem; font-weight: bold; color: var(--text-color); line-height: 1.4; }
         .weather-temp { font-weight: bold; font-size: 1.1rem; color: var(--accent-color); }
 
-        .timeline-card { background: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 12px; border: 1px solid #f0f0f0; display: flex; gap: 15px; position: relative; }
+        /* 🔥 UI 調整：行程卡片往左移動，讓出右邊空間 🔥 */
+        .timeline-card { background: var(--card-bg); border-radius: 12px; padding: 15px 12px 15px 10px; margin-bottom: 12px; border: 1px solid #f0f0f0; display: flex; gap: 10px; position: relative; }
         .drag-handle { color: #ccc; cursor: grab; display: flex; align-items: center; font-size: 1.2rem; }
-        .time-col { min-width: 80px; }
+        
+        /* 🔥 UI 調整：縮小時間行寬度，文字區域往左貼近 🔥 */
+        .time-col { min-width: 72px; }
         .time-input { font-size: 0.9rem; font-weight: bold; color: var(--accent-color); border: 1px solid var(--light-gray); background: var(--tab-bg); border-radius: 6px; padding: 4px; width: 100%; text-align: center; }
-        .event-col { border-left: 2px solid var(--accent-color); padding-left: 15px; flex-grow: 1; }
+        .event-col { border-left: 2px solid var(--accent-color); padding-left: 12px; flex-grow: 1; padding-right: 15px; }
         .event-title { font-size: 1rem; font-weight: bold; margin-bottom: 4px; }
         .loc-text { font-size: 0.8rem; color: #888; }
         
-        /* 🔥 1. UI 調整：動作按鈕 50/50 滿版佈局 🔥 */
         .action-row { display: flex; gap: 10px; margin-top: 10px; }
         .action-btn { flex: 1; padding: 8px; border-radius: 8px; font-size: 1.2rem; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; }
         .memo-btn { background: var(--tab-bg); color: var(--accent-color); }
@@ -201,9 +204,8 @@
     let weatherForecast = [];
     let currentDates = [];
     let sortableInstance = null;
-    let manuallyOpenedMemos = new Set(); // 記錄手動展開的備忘錄
+    let manuallyOpenedMemos = new Set();
     
-    // 🌍 動態幣別設定
     let currentCurrency = { code: 'USD', rate: 32.2, symbol: '$' };
     
     function detectCurrency(title) {
@@ -212,7 +214,7 @@
         if (/🇪🇺|歐洲|法國|德國|義大利/.test(title)) return { code: 'EUR', rate: 34.5, symbol: '€' };
         if (/🇬🇧|英國|倫敦/.test(title)) return { code: 'GBP', rate: 40.5, symbol: '£' };
         if (/🇹🇼|台灣|台北/.test(title)) return { code: 'TWD', rate: 1, symbol: 'NT$' };
-        return { code: 'USD', rate: 32.2, symbol: '$' }; // 預設
+        return { code: 'USD', rate: 32.2, symbol: '$' }; 
     }
 
     let appData = {
@@ -264,7 +266,6 @@
     function renderTrips() {
         const list = document.getElementById('trip-list'); list.innerHTML = '';
         appData.trips.forEach((trip, idx) => {
-            // 🔥 首頁：換成精緻的小 × 刪除按鈕 🔥
             list.innerHTML += `
                 <div class="trip-card">
                     <div class="trip-info" onclick="openTrip('${trip.title}')">
@@ -309,7 +310,6 @@
         if(!trip) return;
         activeTripTitle = title; appData.lastOpenTrip = title; saveData();
         
-        // 🔥 動態切換幣別 🔥
         currentCurrency = detectCurrency(title);
         document.getElementById('exp-amount').placeholder = `金額 (${currentCurrency.code})...`;
         document.getElementById('usd-input').placeholder = `當地幣別 ${currentCurrency.code}`;
@@ -357,7 +357,6 @@
         }
     }
 
-    // 🔥 智慧檢測：是否該自動展開備忘錄？ 🔥
     function checkAutoOpenMemo(tripStartDate, dayNum, eventTime) {
         if(!eventTime) return false;
         const [y, m, d] = tripStartDate.split('-');
@@ -369,7 +368,6 @@
             const [eh, em] = eventTime.split(':').map(Number);
             const eventTotalMins = eh * 60 + em;
             const nowTotalMins = now.getHours() * 60 + now.getMinutes();
-            // 如果現在時間介於「行程前 30 分鐘」到「行程後 90 分鐘」之間，自動展開
             if (nowTotalMins >= eventTotalMins - 30 && nowTotalMins <= eventTotalMins + 90) return true;
         }
         return false;
@@ -398,12 +396,12 @@
             const memoText = ev.memo || '';
             const id = `${dayNum}-${idx}`;
             
-            // 判斷是否要展開：手動點開過，或是被系統自動偵測到
             let memoDisplay = 'none';
             if (manuallyOpenedMemos.has(id) || checkAutoOpenMemo(trip.startDate, dayNum, ev.time)) {
                 memoDisplay = 'block';
             }
             
+            // 🔥 UI 套用：使用 var(--memo-bg) 作為備忘錄背景，營造無印良品風 🔥
             container.innerHTML += `
                 <div class="timeline-card" data-idx="${idx}">
                     <div class="drag-handle">⋮⋮</div>
@@ -418,7 +416,7 @@
                         </div>
                         
                         <div id="memo-${id}" style="display: ${memoDisplay}; margin-top: 10px;">
-                            <textarea placeholder="例如：想逛的店、必吃小吃..." onblur="updateEv(${dayNum}, ${idx}, 'memo', this.value)" style="width: 100%; padding: 10px; border: 1px dashed var(--accent-color); border-radius: 8px; font-size: 14px; background: #faf8f5; resize: vertical; min-height: 60px; box-sizing: border-box; font-family: inherit;">${memoText}</textarea>
+                            <textarea placeholder="例如：想逛的店、必吃小吃..." onblur="updateEv(${dayNum}, ${idx}, 'memo', this.value)" style="width: 100%; padding: 10px; border: 1px dashed var(--accent-color); border-radius: 8px; font-size: 14px; background: var(--memo-bg); resize: vertical; min-height: 60px; box-sizing: border-box; font-family: inherit;">${memoText}</textarea>
                         </div>
                     </div>
                     <button onclick="delEv(${dayNum}, ${idx})" style="position:absolute; right:10px; top:15px; border:none; background:none; color:#ddd; font-size:1.2rem;">×</button>
@@ -473,10 +471,8 @@
         const cont = document.getElementById('expense-list-container'); cont.innerHTML = ''; let t = 0;
         appData.expenses.forEach((e, i) => { 
             t += e.amt; 
-            // 🔥 在清單中加上對應的幣別符號 🔥
             cont.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px dashed #eee;"><div>${e.cat} ${e.name}</div><div>${currentCurrency.symbol}${e.amt} <button onclick="delExp(${i})" style="border:none; background:none; color:#ccc; font-size:1.2rem;">×</button></div></div>`; 
         });
-        // 🔥 動態匯率計算總和 🔥
         document.getElementById('total-twd').innerText = Math.round(t * currentCurrency.rate).toLocaleString();
     }
     function delExp(i) { if(confirm('刪除此帳目？')) { appData.expenses.splice(i, 1); saveData(); renderExpenses(); } }
@@ -512,7 +508,6 @@
     function saveSummary() { const d = document.querySelector('.date-tab.active').innerText.match(/\d+/)[0]; if(!appData.summaries[activeTripTitle]) appData.summaries[activeTripTitle] = {}; appData.summaries[activeTripTitle][d] = document.getElementById('board-summary').innerText; saveData(); }
     function switchMainTab(id, el) { document.querySelectorAll('.main-tab-content').forEach(c => c.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.getElementById(id).classList.add('active'); el.classList.add('active'); }
     
-    // 🔥 工具頁面的匯率換算也使用動態匯率 🔥
     function calcExchange() { const v = document.getElementById('usd-input').value; document.getElementById('twd-result').innerText = v ? Math.round(v * currentCurrency.rate).toLocaleString() : '0'; }
     
     function saveHotelAddress() { appData.hotelAddress = document.getElementById('hotel-address').innerText; saveData(); }
