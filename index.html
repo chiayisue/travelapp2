@@ -54,8 +54,12 @@
         .event-col { border-left: 2px solid var(--accent-color); padding-left: 15px; flex-grow: 1; }
         .event-title { font-size: 1rem; font-weight: bold; margin-bottom: 4px; }
         .loc-text { font-size: 0.8rem; color: #888; }
-        .map-link-btn { font-size: 0.75rem; color: #1a73e8; background: #f1f3f4; padding: 4px 8px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold;}
-        .memo-btn { font-size: 0.75rem; color: var(--accent-color); background: var(--tab-bg); padding: 4px 8px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; }
+        
+        /* 🔥 1. UI 調整：動作按鈕 50/50 滿版佈局 🔥 */
+        .action-row { display: flex; gap: 10px; margin-top: 10px; }
+        .action-btn { flex: 1; padding: 8px; border-radius: 8px; font-size: 1.2rem; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; }
+        .memo-btn { background: var(--tab-bg); color: var(--accent-color); }
+        .map-btn { background: #e8f0fe; color: #1a73e8; }
         
         .card { background: var(--card-bg); border-radius: 12px; padding: 18px; margin-bottom: 15px; border: 1px solid #f0f0f0; }
         
@@ -159,7 +163,16 @@
         <div class="card">
             <strong>🏨 飯店地址</strong>
             <div contenteditable="true" id="hotel-address" style="margin: 15px 0; font-weight: bold;" onblur="saveHotelAddress()">載入中...</div>
-            <button onclick="openHotelMap()" style="width:100%; padding:12px; border:none; border-radius:10px; background:#e8f0fe; color:#1a73e8; font-weight:bold;">在 Google Maps 開啟</button>
+            <button onclick="openHotelMap()" style="width:100%; padding:12px; border:none; border-radius:10px; background:#e8f0fe; color:#1a73e8; font-weight:bold;">📍 在 Google Maps 開啟</button>
+        </div>
+
+        <div class="card">
+            <strong id="exchange-rate-label">💰 匯率換算</strong>
+            <div style="display: flex; align-items: center; border-bottom: 2px solid var(--accent-color); padding: 10px 0;">
+                <span class="currency-symbol" style="font-size: 1.5rem; margin-right: 10px;">$</span>
+                <input type="number" id="usd-input" placeholder="當地金額" oninput="calcExchange()" style="border:none; outline:none; font-size:1.5rem; width:100%; background:none;">
+            </div>
+            <div style="text-align: right; margin-top:15px; color: #666;">≈ <span id="twd-result" style="color: var(--accent-color); font-size: 1.8rem; font-weight: bold;">0</span> 台幣</div>
         </div>
 
         <h3 style="color: var(--accent-color); margin-top: 30px;">🧳 行李檢查</h3>
@@ -188,8 +201,20 @@
     let weatherForecast = [];
     let currentDates = [];
     let sortableInstance = null;
+    let manuallyOpenedMemos = new Set(); // 記錄手動展開的備忘錄
     
-    // 初始化時加入 food 陣列
+    // 🌍 動態幣別設定
+    let currentCurrency = { code: 'USD', rate: 32.2, symbol: '$' };
+    
+    function detectCurrency(title) {
+        if (/🇯🇵|日本|東京|大阪|京都/.test(title)) return { code: 'JPY', rate: 0.21, symbol: '¥' };
+        if (/🇰🇷|韓國|首爾/.test(title)) return { code: 'KRW', rate: 0.024, symbol: '₩' };
+        if (/🇪🇺|歐洲|法國|德國|義大利/.test(title)) return { code: 'EUR', rate: 34.5, symbol: '€' };
+        if (/🇬🇧|英國|倫敦/.test(title)) return { code: 'GBP', rate: 40.5, symbol: '£' };
+        if (/🇹🇼|台灣|台北/.test(title)) return { code: 'TWD', rate: 1, symbol: 'NT$' };
+        return { code: 'USD', rate: 32.2, symbol: '$' }; // 預設
+    }
+
     let appData = {
         lastOpenTrip: null, hotelAddress: "載入中...", trips: [], summaries: {}, 
         shopping: [], food: [], packing: [], expenses: [], itineraries: {}
@@ -212,9 +237,7 @@
             if (res.ok) {
                 const cloudData = await res.json();
                 if (cloudData && cloudData.trips) {
-                    // 自動修復：確保 food 清單存在，避免舊資料報錯
                     cloudData.food = cloudData.food || [];
-                    
                     cloudData.trips.forEach(t => {
                         if(!t.endDate) {
                             const [y, m, d] = t.startDate.split('-');
@@ -241,6 +264,7 @@
     function renderTrips() {
         const list = document.getElementById('trip-list'); list.innerHTML = '';
         appData.trips.forEach((trip, idx) => {
+            // 🔥 首頁：換成精緻的小 × 刪除按鈕 🔥
             list.innerHTML += `
                 <div class="trip-card">
                     <div class="trip-info" onclick="openTrip('${trip.title}')">
@@ -284,10 +308,19 @@
         const trip = appData.trips.find(t => t.title === title);
         if(!trip) return;
         activeTripTitle = title; appData.lastOpenTrip = title; saveData();
+        
+        // 🔥 動態切換幣別 🔥
+        currentCurrency = detectCurrency(title);
+        document.getElementById('exp-amount').placeholder = `金額 (${currentCurrency.code})...`;
+        document.getElementById('usd-input').placeholder = `當地幣別 ${currentCurrency.code}`;
+        document.getElementById('exchange-rate-label').innerText = `💰 匯率換算 (1 : ${currentCurrency.rate})`;
+        document.querySelector('.currency-symbol').innerText = currentCurrency.symbol;
+
         document.getElementById('index-page').style.display = 'none';
         document.getElementById('trip-container').style.display = 'block';
         document.getElementById('top-title').innerText = title;
         document.getElementById('top-date').innerText = `${trip.startDate} ~ ${trip.endDate}`;
+        
         generateDateTabs(trip.startDate, trip.endDate); 
         fetchWeather(title); renderLists(); renderExpenses();
     }
@@ -324,14 +357,34 @@
         }
     }
 
-    // 🔥 備忘錄展開與切換功能 🔥
+    // 🔥 智慧檢測：是否該自動展開備忘錄？ 🔥
+    function checkAutoOpenMemo(tripStartDate, dayNum, eventTime) {
+        if(!eventTime) return false;
+        const [y, m, d] = tripStartDate.split('-');
+        const eventDate = new Date(y, m - 1, d);
+        eventDate.setDate(eventDate.getDate() + (dayNum - 1));
+        
+        const now = new Date();
+        if (now.getFullYear() === eventDate.getFullYear() && now.getMonth() === eventDate.getMonth() && now.getDate() === eventDate.getDate()) {
+            const [eh, em] = eventTime.split(':').map(Number);
+            const eventTotalMins = eh * 60 + em;
+            const nowTotalMins = now.getHours() * 60 + now.getMinutes();
+            // 如果現在時間介於「行程前 30 分鐘」到「行程後 90 分鐘」之間，自動展開
+            if (nowTotalMins >= eventTotalMins - 30 && nowTotalMins <= eventTotalMins + 90) return true;
+        }
+        return false;
+    }
+
     function toggleMemo(dayNum, idx) {
-        const memoDiv = document.getElementById(`memo-${dayNum}-${idx}`);
+        const id = `${dayNum}-${idx}`;
+        const memoDiv = document.getElementById(`memo-${id}`);
         if(memoDiv.style.display === 'none') {
             memoDiv.style.display = 'block';
+            manuallyOpenedMemos.add(id);
             memoDiv.querySelector('textarea').focus();
         } else {
             memoDiv.style.display = 'none';
+            manuallyOpenedMemos.delete(id);
         }
     }
 
@@ -339,9 +392,17 @@
         const container = document.getElementById('itinerary-list'); container.innerHTML = '';
         if(!appData.itineraries[activeTripTitle]) return;
         const events = appData.itineraries[activeTripTitle][dayNum] || [];
+        const trip = appData.trips.find(t => t.title === activeTripTitle);
+
         events.forEach((ev, idx) => {
             const memoText = ev.memo || '';
-            const memoDisplay = ev.memo ? 'block' : 'none'; // 如果有內容，預設展開，否則隱藏
+            const id = `${dayNum}-${idx}`;
+            
+            // 判斷是否要展開：手動點開過，或是被系統自動偵測到
+            let memoDisplay = 'none';
+            if (manuallyOpenedMemos.has(id) || checkAutoOpenMemo(trip.startDate, dayNum, ev.time)) {
+                memoDisplay = 'block';
+            }
             
             container.innerHTML += `
                 <div class="timeline-card" data-idx="${idx}">
@@ -351,12 +412,12 @@
                         <div class="event-title" contenteditable="true" onblur="updateEv(${dayNum}, ${idx}, 'title', this.innerText)">${ev.title}</div>
                         <div class="loc-text" contenteditable="true" onblur="updateEv(${dayNum}, ${idx}, 'loc', this.innerText)">${ev.loc}</div>
                         
-                        <div style="display: flex; gap: 8px; margin-top: 10px;">
-                            <button class="memo-btn" onclick="toggleMemo(${dayNum}, ${idx})">📝 備忘錄</button>
-                            <button class="map-link-btn" onclick="window.open('https://www.google.com/maps/search/?api=1&query=$${encodeURIComponent(ev.loc)}','_blank')">🗺️ Google Maps</button>
+                        <div class="action-row">
+                            <button class="action-btn memo-btn" onclick="toggleMemo(${dayNum}, ${idx})">📝</button>
+                            <button class="action-btn map-btn" onclick="window.open('https://www.google.com/maps/search/?api=1&query=$${encodeURIComponent(ev.loc)}','_blank')">📍</button>
                         </div>
                         
-                        <div id="memo-${dayNum}-${idx}" style="display: ${memoDisplay}; margin-top: 10px;">
+                        <div id="memo-${id}" style="display: ${memoDisplay}; margin-top: 10px;">
                             <textarea placeholder="例如：想逛的店、必吃小吃..." onblur="updateEv(${dayNum}, ${idx}, 'memo', this.value)" style="width: 100%; padding: 10px; border: 1px dashed var(--accent-color); border-radius: 8px; font-size: 14px; background: #faf8f5; resize: vertical; min-height: 60px; box-sizing: border-box; font-family: inherit;">${memoText}</textarea>
                         </div>
                     </div>
@@ -407,10 +468,16 @@
         if(!n.value || !a.value) return; appData.expenses.push({ cat: c.value, name: n.value, amt: parseFloat(a.value) });
         saveData(); renderExpenses(); n.value = ''; a.value = '';
     }
+    
     function renderExpenses() {
         const cont = document.getElementById('expense-list-container'); cont.innerHTML = ''; let t = 0;
-        appData.expenses.forEach((e, i) => { t += e.amt; cont.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px dashed #eee;"><div>${e.cat} ${e.name}</div><div>$${e.amt} <button onclick="delExp(${i})" style="border:none; background:none; color:#ccc; font-size:1.2rem;">×</button></div></div>`; });
-        document.getElementById('total-twd').innerText = Math.round(t * 32.2).toLocaleString();
+        appData.expenses.forEach((e, i) => { 
+            t += e.amt; 
+            // 🔥 在清單中加上對應的幣別符號 🔥
+            cont.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px dashed #eee;"><div>${e.cat} ${e.name}</div><div>${currentCurrency.symbol}${e.amt} <button onclick="delExp(${i})" style="border:none; background:none; color:#ccc; font-size:1.2rem;">×</button></div></div>`; 
+        });
+        // 🔥 動態匯率計算總和 🔥
+        document.getElementById('total-twd').innerText = Math.round(t * currentCurrency.rate).toLocaleString();
     }
     function delExp(i) { if(confirm('刪除此帳目？')) { appData.expenses.splice(i, 1); saveData(); renderExpenses(); } }
 
@@ -420,12 +487,9 @@
         saveData(); v.value = ''; renderLists();
     }
     
-    // 🔥 清單與工具頁面的渲染邏輯整合 🔥
     function renderLists() {
-        // 1. 採買清單 (在清單 Tab)
         document.getElementById('shopping-list-container').innerHTML = appData.shopping.map((item, i) => `<div class="list-row"><span><input type="checkbox" ${item.checked?'checked':''} onchange="toggleCheck('shopping',${i})"> ${item.text}</span><button class="del-item-btn" onclick="delListObj('shopping', ${i})">×</button></div>`).join('');
         
-        // 2. 美食清單 (在清單 Tab)
         const f = document.getElementById('food-list-container'); f.innerHTML = ''; const gf = {};
         appData.food.forEach((item, i) => { if(!gf[item.cat]) gf[item.cat] = []; item.idx = i; gf[item.cat].push(item); });
         for (const [cat, items] of Object.entries(gf)) {
@@ -434,7 +498,6 @@
             f.innerHTML += h;
         }
 
-        // 3. 行李檢查 (在工具 Tab)
         const p = document.getElementById('packing-list-container'); p.innerHTML = ''; const gp = {};
         appData.packing.forEach((item, i) => { if(!gp[item.cat]) gp[item.cat] = []; item.idx = i; gp[item.cat].push(item); });
         for (const [cat, items] of Object.entries(gp)) {
@@ -448,7 +511,10 @@
     function toggleCheck(t, i) { appData[t][i].checked = !appData[t][i].checked; saveData(); renderLists(); }
     function saveSummary() { const d = document.querySelector('.date-tab.active').innerText.match(/\d+/)[0]; if(!appData.summaries[activeTripTitle]) appData.summaries[activeTripTitle] = {}; appData.summaries[activeTripTitle][d] = document.getElementById('board-summary').innerText; saveData(); }
     function switchMainTab(id, el) { document.querySelectorAll('.main-tab-content').forEach(c => c.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.getElementById(id).classList.add('active'); el.classList.add('active'); }
-    function calcExchange() { const v = document.getElementById('usd-input').value; document.getElementById('twd-result').innerText = v ? Math.round(v * 32.2).toLocaleString() : '0'; }
+    
+    // 🔥 工具頁面的匯率換算也使用動態匯率 🔥
+    function calcExchange() { const v = document.getElementById('usd-input').value; document.getElementById('twd-result').innerText = v ? Math.round(v * currentCurrency.rate).toLocaleString() : '0'; }
+    
     function saveHotelAddress() { appData.hotelAddress = document.getElementById('hotel-address').innerText; saveData(); }
     function openHotelMap() { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(appData.hotelAddress)}`, '_blank'); }
 
