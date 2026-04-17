@@ -6,7 +6,7 @@
     <title>Sue's Travel Planner</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Bon voyage">
+    <meta name="apple-mobile-web-app-title" content="Sue's Trip">
     <link rel="apple-touch-icon" href="https://i.imgur.com/rRmXupF.jpeg">
     <link rel="icon" href="https://i.imgur.com/rRmXupF.jpeg">
 
@@ -18,7 +18,6 @@
         #index-page { padding: 20px; display: block; padding-bottom: 100px; animation: fadeIn 0.3s; }
         .page-title { font-size: 1.8rem; margin: 10px 0 20px 0; letter-spacing: 1px; text-align: center;}
         
-        /* 旅程卡片樣式優化 */
         .trip-card { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; transition: transform 0.1s;}
         .trip-card:active { transform: scale(0.98); }
         .trip-info { flex: 1; cursor: pointer; }
@@ -55,11 +54,12 @@
         .event-col { border-left: 2px solid var(--accent-color); padding-left: 15px; flex-grow: 1; }
         .event-title { font-size: 1rem; font-weight: bold; margin-bottom: 4px; }
         .loc-text { font-size: 0.8rem; color: #888; }
-        .map-link-btn { font-size: 0.75rem; color: #1a73e8; background: #f1f3f4; padding: 4px 8px; border-radius: 6px; border: none; margin-top: 8px; cursor: pointer; font-weight: bold;}
+        .map-link-btn { font-size: 0.75rem; color: #1a73e8; background: #f1f3f4; padding: 4px 8px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold;}
+        .memo-btn { font-size: 0.75rem; color: var(--accent-color); background: var(--tab-bg); padding: 4px 8px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; }
         
         .card { background: var(--card-bg); border-radius: 12px; padding: 18px; margin-bottom: 15px; border: 1px solid #f0f0f0; }
         
-        input[type="text"], input[type="number"], select { flex: 1; width: 100%; padding: 12px; border: 1px solid var(--light-gray); border-radius: 8px; font-size: 16px; box-sizing: border-box; background-color: #fff; }
+        input[type="text"], input[type="number"], input[type="date"], select { flex: 1; width: 100%; padding: 12px; border: 1px solid var(--light-gray); border-radius: 8px; font-size: 16px; box-sizing: border-box; background-color: #fff; }
         input[type="checkbox"] { width: 22px; height: 22px; margin: 0 12px 0 0; flex: none; cursor: pointer; accent-color: var(--accent-color); }
         
         .add-btn { background: var(--accent-color); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; white-space: nowrap; }
@@ -68,7 +68,7 @@
         .list-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
         .list-row span { display: flex; align-items: center; flex: 1; font-size: 16px; }
 
-        [contenteditable="true"]:focus { outline: none; background: #fffcf5; border-bottom: 1px dashed var(--accent-color); }
+        [contenteditable="true"]:focus, textarea:focus { outline: none; background: #fffcf5; border-color: var(--accent-color); }
         .sync-indicator { font-size: 11px; color: #999; text-align: center; margin-bottom: 10px; }
     </style>
 </head>
@@ -83,13 +83,11 @@
     <div class="card" style="margin-top: 30px; border: 1px dashed var(--accent-color);">
         <div style="font-weight: bold; color: var(--accent-color); margin-bottom: 10px;">＋ 規劃新旅程</div>
         <input type="text" id="new-trip-title" placeholder="旅程名稱 (如: 🇯🇵 東京之旅)">
-        
         <div style="display:flex; align-items:center; gap:10px; margin-top:10px;">
             <input type="date" id="new-trip-start" style="padding:12px; border:1px solid var(--light-gray); border-radius:8px; font-size:15px; flex:1; box-sizing:border-box;">
             <span style="color:#888; font-weight:bold;">~</span>
             <input type="date" id="new-trip-end" style="padding:12px; border:1px solid var(--light-gray); border-radius:8px; font-size:15px; flex:1; box-sizing:border-box;">
         </div>
-        
         <button class="add-btn" onclick="addNewTrip()" style="width: 100%; margin-top: 15px;">建立旅程</button>
     </div>
 </div>
@@ -143,7 +141,28 @@
         <div style="display:flex; gap:10px; margin-bottom: 20px;"><input type="text" id="shop-input" placeholder="想買什麼？"><button class="add-btn" onclick="addListObj('shopping', 'shop-input', '')">新增</button></div>
         <div class="card" id="shopping-list-container"></div>
 
-        <h3 style="color: var(--accent-color);">🧳 行李檢查</h3>
+        <h3 style="color: var(--accent-color); margin-top: 30px;">🍔 必吃美食</h3>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;">
+            <select id="food-cat">
+                <option value="☕ 咖啡">☕ 咖啡</option>
+                <option value="🍽️ 正餐">🍽️ 正餐</option>
+                <option value="🍰 點心">🍰 點心</option>
+                <option value="🍺 酒吧">🍺 酒吧</option>
+            </select>
+            <div style="display:flex; gap:10px;"><input type="text" id="food-input" placeholder="想吃哪家店？"><button class="add-btn" onclick="addListObj('food', 'food-input', 'food-cat')">新增</button></div>
+        </div>
+        <div class="card" id="food-list-container"></div>
+    </div>
+
+    <div id="tab-tools" class="main-tab-content">
+        <h3 style="color: var(--accent-color);">🧰 旅行助手</h3>
+        <div class="card">
+            <strong>🏨 飯店地址</strong>
+            <div contenteditable="true" id="hotel-address" style="margin: 15px 0; font-weight: bold;" onblur="saveHotelAddress()">載入中...</div>
+            <button onclick="openHotelMap()" style="width:100%; padding:12px; border:none; border-radius:10px; background:#e8f0fe; color:#1a73e8; font-weight:bold;">在 Google Maps 開啟</button>
+        </div>
+
+        <h3 style="color: var(--accent-color); margin-top: 30px;">🧳 行李檢查</h3>
         <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;">
             <select id="pack-cat">
                 <option value="必備文件">必備文件</option>
@@ -154,23 +173,6 @@
             <div style="display:flex; gap:10px;"><input type="text" id="pack-input" placeholder="要帶什麼？"><button class="add-btn" onclick="addListObj('packing', 'pack-input', 'pack-cat')">新增</button></div>
         </div>
         <div class="card" id="packing-list-container"></div>
-    </div>
-
-    <div id="tab-tools" class="main-tab-content">
-        <h3 style="color: var(--accent-color);">🧰 旅行助手</h3>
-        <div class="card">
-            <strong>🏨 飯店地址</strong>
-            <div contenteditable="true" id="hotel-address" style="margin: 15px 0; font-weight: bold;" onblur="saveHotelAddress()">載入中...</div>
-            <button onclick="openHotelMap()" style="width:100%; padding:12px; border:none; border-radius:10px; background:#e8f0fe; color:#1a73e8; font-weight:bold;">在 Google Maps 開啟</button>
-        </div>
-        <div class="card">
-            <strong>💰 匯率換算 (1:32.2)</strong>
-            <div style="display: flex; align-items: center; border-bottom: 2px solid var(--accent-color); padding: 10px 0;">
-                <span style="font-size: 1.5rem; margin-right: 10px;">$</span>
-                <input type="number" id="usd-input" placeholder="美金 USD" oninput="calcExchange()" style="border:none; outline:none; font-size:1.5rem; width:100%; background:none;">
-            </div>
-            <div style="text-align: right; margin-top:15px; color: #666;">≈ <span id="twd-result" style="color: var(--accent-color); font-size: 1.8rem; font-weight: bold;">0</span> 台幣</div>
-        </div>
     </div>
 
     <nav>
@@ -187,10 +189,10 @@
     let currentDates = [];
     let sortableInstance = null;
     
+    // 初始化時加入 food 陣列
     let appData = {
-        lastOpenTrip: null,
-        hotelAddress: "載入中...",
-        trips: [], summaries: {}, shopping: [], packing: [], expenses: [], itineraries: {}
+        lastOpenTrip: null, hotelAddress: "載入中...", trips: [], summaries: {}, 
+        shopping: [], food: [], packing: [], expenses: [], itineraries: {}
     };
 
     async function saveData() {
@@ -210,7 +212,9 @@
             if (res.ok) {
                 const cloudData = await res.json();
                 if (cloudData && cloudData.trips) {
-                    // 自動修復舊資料：如果舊旅程沒有 endDate，自動給它 4 天後的時間
+                    // 自動修復：確保 food 清單存在，避免舊資料報錯
+                    cloudData.food = cloudData.food || [];
+                    
                     cloudData.trips.forEach(t => {
                         if(!t.endDate) {
                             const [y, m, d] = t.startDate.split('-');
@@ -237,7 +241,6 @@
     function renderTrips() {
         const list = document.getElementById('trip-list'); list.innerHTML = '';
         appData.trips.forEach((trip, idx) => {
-            // 🔥 修改：換回小巧精緻的 × 刪除按鈕 🔥
             list.innerHTML += `
                 <div class="trip-card">
                     <div class="trip-info" onclick="openTrip('${trip.title}')">
@@ -250,14 +253,13 @@
     }
 
     async function deleteTrip(event, idx) {
-        event.stopPropagation(); // 阻止點擊刪除時觸發開啟行程
-        if(confirm(`確定要刪除「${appData.trips[idx].title}」嗎？這會連同行程也一起刪除喔！`)) {
+        event.stopPropagation();
+        if(confirm(`確定要刪除「${appData.trips[idx].title}」嗎？`)) {
             const title = appData.trips[idx].title;
             appData.trips.splice(idx, 1);
             delete appData.itineraries[title];
             delete appData.summaries[title];
-            await saveData();
-            renderTrips();
+            await saveData(); renderTrips();
         }
     }
 
@@ -270,10 +272,8 @@
         if(new Date(end) < new Date(start)) return alert("結束日期不能早於開始日期喔！");
 
         appData.trips.push({ title, startDate: start, endDate: end });
-        appData.itineraries[title] = {};
-        appData.summaries[title] = {};
-        await saveData();
-        renderTrips();
+        appData.itineraries[title] = {}; appData.summaries[title] = {};
+        await saveData(); renderTrips();
         
         document.getElementById('new-trip-title').value = '';
         document.getElementById('new-trip-start').value = '';
@@ -289,32 +289,21 @@
         document.getElementById('top-title').innerText = title;
         document.getElementById('top-date').innerText = `${trip.startDate} ~ ${trip.endDate}`;
         generateDateTabs(trip.startDate, trip.endDate); 
-        fetchWeather(title); // 智慧抓取天氣
-        renderLists(); renderExpenses();
+        fetchWeather(title); renderLists(); renderExpenses();
     }
 
     function goHome() { appData.lastOpenTrip = null; saveData(); document.getElementById('trip-container').style.display = 'none'; document.getElementById('index-page').style.display = 'block'; }
 
-    // 🔥 修改：智慧天數計算引擎 🔥
     function generateDateTabs(startStr, endStr) {
         const container = document.getElementById('dynamic-date-tabs'); container.innerHTML = ''; currentDates = [];
-        
-        // 解析日期避免時區誤差
-        const [sy, sm, sd] = startStr.split('-');
-        const [ey, em, ed] = endStr.split('-');
-        const start = new Date(sy, sm - 1, sd);
-        const end = new Date(ey, em - 1, ed);
-        
-        const diffTime = end - start;
-        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1; // 計算總天數
+        const [sy, sm, sd] = startStr.split('-'); const [ey, em, ed] = endStr.split('-');
+        const start = new Date(sy, sm - 1, sd); const end = new Date(ey, em - 1, ed);
+        const diffDays = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
         
         const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         for(let i=0; i<diffDays; i++) {
-            let current = new Date(sy, sm - 1, sd); 
-            current.setDate(current.getDate() + i);
-            let mm = String(current.getMonth() + 1).padStart(2, '0');
-            let dd = String(current.getDate()).padStart(2, '0');
-            let displayDate = `${mm}/${dd}`;
+            let current = new Date(sy, sm - 1, sd); current.setDate(current.getDate() + i);
+            let displayDate = `${String(current.getMonth() + 1).padStart(2, '0')}/${String(current.getDate()).padStart(2, '0')}`;
             currentDates.push(displayDate);
             container.innerHTML += `<div class="date-tab" onclick="switchDate(${i+1}, this)"><div style="font-size:0.8rem; font-weight:bold;">Day ${i+1}</div><div>${displayDate}</div><div style="font-size:0.6rem;">(${weekdays[current.getDay()]})</div></div>`;
         }
@@ -327,13 +316,22 @@
         document.getElementById('board-summary').innerText = (appData.summaries[activeTripTitle] && appData.summaries[activeTripTitle][dayNum]) || "點擊輸入今日重點...";
         renderItinerary(dayNum);
         
-        // 天氣保護機制 (如果日期超出預報範圍)
         if(weatherForecast[dayNum-1]) {
             document.getElementById('board-temp').innerText = `${weatherForecast[dayNum-1].min}°~${weatherForecast[dayNum-1].max}°`;
             document.getElementById('board-icon').innerText = weatherForecast[dayNum-1].icon;
         } else {
-            document.getElementById('board-temp').innerText = `--°C`;
-            document.getElementById('board-icon').innerText = `🌤️`;
+            document.getElementById('board-temp').innerText = `--°C`; document.getElementById('board-icon').innerText = `🌤️`;
+        }
+    }
+
+    // 🔥 備忘錄展開與切換功能 🔥
+    function toggleMemo(dayNum, idx) {
+        const memoDiv = document.getElementById(`memo-${dayNum}-${idx}`);
+        if(memoDiv.style.display === 'none') {
+            memoDiv.style.display = 'block';
+            memoDiv.querySelector('textarea').focus();
+        } else {
+            memoDiv.style.display = 'none';
         }
     }
 
@@ -342,6 +340,9 @@
         if(!appData.itineraries[activeTripTitle]) return;
         const events = appData.itineraries[activeTripTitle][dayNum] || [];
         events.forEach((ev, idx) => {
+            const memoText = ev.memo || '';
+            const memoDisplay = ev.memo ? 'block' : 'none'; // 如果有內容，預設展開，否則隱藏
+            
             container.innerHTML += `
                 <div class="timeline-card" data-idx="${idx}">
                     <div class="drag-handle">⋮⋮</div>
@@ -349,7 +350,15 @@
                     <div class="event-col">
                         <div class="event-title" contenteditable="true" onblur="updateEv(${dayNum}, ${idx}, 'title', this.innerText)">${ev.title}</div>
                         <div class="loc-text" contenteditable="true" onblur="updateEv(${dayNum}, ${idx}, 'loc', this.innerText)">${ev.loc}</div>
-                        <button class="map-link-btn" onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ev.loc)}','_blank')">🗺️ Google Maps</button>
+                        
+                        <div style="display: flex; gap: 8px; margin-top: 10px;">
+                            <button class="memo-btn" onclick="toggleMemo(${dayNum}, ${idx})">📝 備忘錄</button>
+                            <button class="map-link-btn" onclick="window.open('https://www.google.com/maps/search/?api=1&query=$${encodeURIComponent(ev.loc)}','_blank')">🗺️ Google Maps</button>
+                        </div>
+                        
+                        <div id="memo-${dayNum}-${idx}" style="display: ${memoDisplay}; margin-top: 10px;">
+                            <textarea placeholder="例如：想逛的店、必吃小吃..." onblur="updateEv(${dayNum}, ${idx}, 'memo', this.value)" style="width: 100%; padding: 10px; border: 1px dashed var(--accent-color); border-radius: 8px; font-size: 14px; background: #faf8f5; resize: vertical; min-height: 60px; box-sizing: border-box; font-family: inherit;">${memoText}</textarea>
+                        </div>
                     </div>
                     <button onclick="delEv(${dayNum}, ${idx})" style="position:absolute; right:10px; top:15px; border:none; background:none; color:#ddd; font-size:1.2rem;">×</button>
                 </div>`;
@@ -371,19 +380,17 @@
         const d = document.querySelector('.date-tab.active').innerText.match(/\d+/)[0];
         if(!appData.itineraries[activeTripTitle]) appData.itineraries[activeTripTitle] = {};
         if(!appData.itineraries[activeTripTitle][d]) appData.itineraries[activeTripTitle][d] = [];
-        appData.itineraries[activeTripTitle][d].push({ time: '12:00', title: '新行程', loc: '地點' }); 
+        appData.itineraries[activeTripTitle][d].push({ time: '12:00', title: '新行程', loc: '地點', memo: '' }); 
         saveData(); renderItinerary(d); 
     }
 
-    // 智慧抓取天氣：自動過濾 Emoji 並搜尋地點，擴充為 16 天預報
     async function fetchWeather(queryTitle) {
         try {
             const cleanQuery = queryTitle.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim().split(' ')[0] || 'New York';
             const g = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cleanQuery)}&count=1`);
             const gd = await g.json();
-            let la = 40.71, lo = -74.00; // 預設紐約
+            let la = 40.71, lo = -74.00;
             if(gd.results && gd.results.length > 0) { la = gd.results[0].latitude; lo = gd.results[0].longitude; }
-            
             const w = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${la}&longitude=${lo}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto&forecast_days=16`);
             const wd = await w.json();
             weatherForecast = []; 
@@ -412,16 +419,31 @@
         appData[t].push({ text: v.value, cat: c ? document.getElementById(c).value : '', checked: false });
         saveData(); v.value = ''; renderLists();
     }
+    
+    // 🔥 清單與工具頁面的渲染邏輯整合 🔥
     function renderLists() {
+        // 1. 採買清單 (在清單 Tab)
         document.getElementById('shopping-list-container').innerHTML = appData.shopping.map((item, i) => `<div class="list-row"><span><input type="checkbox" ${item.checked?'checked':''} onchange="toggleCheck('shopping',${i})"> ${item.text}</span><button class="del-item-btn" onclick="delListObj('shopping', ${i})">×</button></div>`).join('');
-        const p = document.getElementById('packing-list-container'); p.innerHTML = ''; const g = {};
-        appData.packing.forEach((item, i) => { if(!g[item.cat]) g[item.cat] = []; item.idx = i; g[item.cat].push(item); });
-        for (const [cat, items] of Object.entries(g)) {
+        
+        // 2. 美食清單 (在清單 Tab)
+        const f = document.getElementById('food-list-container'); f.innerHTML = ''; const gf = {};
+        appData.food.forEach((item, i) => { if(!gf[item.cat]) gf[item.cat] = []; item.idx = i; gf[item.cat].push(item); });
+        for (const [cat, items] of Object.entries(gf)) {
+            let h = `<div style="font-weight:bold; color:var(--accent-color); margin-top:10px;">${cat}</div>`;
+            items.forEach(item => { h += `<div class="list-row"><span><input type="checkbox" ${item.checked?'checked':''} onchange="toggleCheck('food',${item.idx})"> ${item.text}</span><button class="del-item-btn" onclick="delListObj('food', ${item.idx})">×</button></div>`; });
+            f.innerHTML += h;
+        }
+
+        // 3. 行李檢查 (在工具 Tab)
+        const p = document.getElementById('packing-list-container'); p.innerHTML = ''; const gp = {};
+        appData.packing.forEach((item, i) => { if(!gp[item.cat]) gp[item.cat] = []; item.idx = i; gp[item.cat].push(item); });
+        for (const [cat, items] of Object.entries(gp)) {
             let h = `<div style="font-weight:bold; color:var(--accent-color); margin-top:10px;">${cat}</div>`;
             items.forEach(item => { h += `<div class="list-row"><span><input type="checkbox" ${item.checked?'checked':''} onchange="toggleCheck('packing',${item.idx})"> ${item.text}</span><button class="del-item-btn" onclick="delListObj('packing', ${item.idx})">×</button></div>`; });
             p.innerHTML += h;
         }
     }
+    
     function delListObj(type, idx) { if(confirm('確定刪除項目？')) { appData[type].splice(idx, 1); saveData(); renderLists(); } }
     function toggleCheck(t, i) { appData[t][i].checked = !appData[t][i].checked; saveData(); renderLists(); }
     function saveSummary() { const d = document.querySelector('.date-tab.active').innerText.match(/\d+/)[0]; if(!appData.summaries[activeTripTitle]) appData.summaries[activeTripTitle] = {}; appData.summaries[activeTripTitle][d] = document.getElementById('board-summary').innerText; saveData(); }
