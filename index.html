@@ -12,8 +12,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
-        /* 🔥 UI 調整：加深若草綠色的辨識度 🔥 */
-        :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --memo-bg: #e3ebd6; --danger-color: #ff4d4f; }
+        /* 🔥 UI 調整：換成日系淡櫻粉色 🔥 */
+        :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --memo-bg: #fceef5; --danger-color: #ff4d4f; }
         body { margin: 0; padding: 0; font-family: "PingFang TC", "Noto Sans TC", -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; overscroll-behavior-y: none; }
         
         #index-page { padding: 20px; display: block; padding-bottom: 100px; animation: fadeIn 0.3s; }
@@ -51,7 +51,6 @@
         .timeline-card { background: var(--card-bg); border-radius: 12px; padding: 15px 12px 15px 10px; margin-bottom: 12px; border: 1px solid #f0f0f0; display: flex; gap: 10px; position: relative; }
         .drag-handle { color: #ccc; cursor: grab; display: flex; align-items: center; font-size: 1.2rem; }
         
-        /* 🔥 UI 調整：時間欄位增加右邊距 (margin-right)，讓它遠離分隔線 🔥 */
         .time-col { min-width: 75px; margin-right: 12px; }
         .time-input { font-size: 0.9rem; font-weight: bold; color: var(--accent-color); border: 1px solid var(--light-gray); background: var(--tab-bg); border-radius: 6px; padding: 6px 4px; width: 100%; text-align: center; box-sizing: border-box; }
         
@@ -62,7 +61,6 @@
         .action-row { display: flex; gap: 10px; margin-top: 10px; }
         .action-btn { flex: 1; padding: 8px; border-radius: 8px; font-size: 1.2rem; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; }
         
-        /* 🔥 UI 調整：正式將備忘錄按鈕綁定新顏色 🔥 */
         .memo-btn { background: var(--memo-bg); color: var(--accent-color); }
         .map-btn { background: #e8f0fe; color: #1a73e8; }
         
