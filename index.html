@@ -15,7 +15,6 @@
         :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --memo-bg: #fff8d6; --danger-color: #ff4d4f; }
         body { margin: 0; padding: 0; font-family: "PingFang TC", "Noto Sans TC", -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; overscroll-behavior-y: none; }
         
-        /* 🔥 UI 調整：頂部加入 safe-area-inset-top，避開 iPhone 時間與瀏海 🔥 */
         #index-page { padding: calc(15px + env(safe-area-inset-top, 20px)) 20px 100px 20px; display: block; animation: fadeIn 0.3s; }
         .page-title { font-size: 1.8rem; margin: 10px 0 20px 0; letter-spacing: 1px; text-align: center;}
         
@@ -23,15 +22,12 @@
         .trip-card:active { transform: scale(0.98); }
         .trip-info { flex: 1; cursor: pointer; }
         
-        /* 🔥 UI 調整：底部容器間距優化 🔥 */
         #trip-container { display: none; padding-bottom: calc(80px + env(safe-area-inset-bottom, 15px)); }
         
-        /* 🔥 UI 調整：頂部 Header 加入 safe-area-inset-top 🔥 */
         .trip-header { padding: calc(15px + env(safe-area-inset-top, 20px)) 20px 10px 20px; display: flex; justify-content: space-between; align-items: flex-start; position: sticky; top: 0; background-color: var(--bg-color); z-index: 90; }
         .header-info h1 { margin: 0; font-size: 1.4rem; }
         .back-btn { background: #fff; border: 1px solid var(--light-gray); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; color: var(--accent-color); cursor: pointer;}
         
-        /* 🔥 UI 調整：底部導航列精準計算留白，不多不少 🔥 */
         nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 12px 0 calc(8px + env(safe-area-inset-bottom, 15px)); border-top: 1px solid var(--light-gray); z-index: 100;}
         .nav-item { text-align: center; font-size: 0.75rem; color: #999; flex: 1; cursor: pointer; }
         .nav-item.active { color: var(--accent-color); font-weight: bold; }
@@ -69,6 +65,9 @@
         .map-btn { background: #e8f0fe; color: #1a73e8; }
         
         .card { background: var(--card-bg); border-radius: 12px; padding: 18px; margin-bottom: 15px; border: 1px solid #f0f0f0; }
+        
+        /* 🔥 UI 調整：加入這行！當卡片內沒有內容時，自動隱藏，消除難看的空白方塊 🔥 */
+        .card:empty { display: none; }
         
         input[type="text"], input[type="number"], input[type="date"], select { flex: 1; width: 100%; padding: 12px; border: 1px solid var(--light-gray); border-radius: 8px; font-size: 16px; box-sizing: border-box; background-color: #fff; }
         input[type="checkbox"] { width: 22px; height: 22px; margin: 0 12px 0 0; flex: none; cursor: pointer; accent-color: var(--accent-color); }
@@ -182,7 +181,7 @@
             <div style="text-align: right; margin-top:15px; color: #666;">≈ <span id="twd-result" style="color: var(--accent-color); font-size: 1.8rem; font-weight: bold;">0</span> 台幣</div>
         </div>
 
-        <h3 style="color: var(--accent-color); margin-top: 30px;">🧳 行備檢查</h3>
+        <h3 style="color: var(--accent-color); margin-top: 30px;">🧳 行李檢查</h3>
         <div style="display:flex; flex-direction:column; gap:10px; margin-bottom: 20px;">
             <select id="pack-cat">
                 <option value="必備文件">必備文件</option>
@@ -477,6 +476,7 @@
             cont.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px dashed #eee;"><div>${e.cat} ${e.name}</div><div>${currentCurrency.symbol}${e.amt} <button onclick="delExp(${i})" style="border:none; background:none; color:#ccc; font-size:1.2rem;">×</button></div></div>`; 
         });
         document.getElementById('total-twd').innerText = Math.round(t * currentCurrency.rate).toLocaleString();
+        if(appData.expenses.length === 0) cont.style.display = 'none'; else cont.style.display = 'block';
     }
     function delExp(i) { if(confirm('刪除此帳目？')) { appData.expenses.splice(i, 1); saveData(); renderExpenses(); } }
 
@@ -487,7 +487,8 @@
     }
     
     function renderLists() {
-        document.getElementById('shopping-list-container').innerHTML = appData.shopping.map((item, i) => `<div class="list-row"><span><input type="checkbox" ${item.checked?'checked':''} onchange="toggleCheck('shopping',${i})"> ${item.text}</span><button class="del-item-btn" onclick="delListObj('shopping', ${i})">×</button></div>`).join('');
+        const sc = document.getElementById('shopping-list-container');
+        sc.innerHTML = appData.shopping.map((item, i) => `<div class="list-row"><span><input type="checkbox" ${item.checked?'checked':''} onchange="toggleCheck('shopping',${i})"> ${item.text}</span><button class="del-item-btn" onclick="delListObj('shopping', ${i})">×</button></div>`).join('');
         
         const f = document.getElementById('food-list-container'); f.innerHTML = ''; const gf = {};
         appData.food.forEach((item, i) => { if(!gf[item.cat]) gf[item.cat] = []; item.idx = i; gf[item.cat].push(item); });
