@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Bon Voyage</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -12,23 +12,35 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <style>
-        /* 🔥 新增了 --memo-bg 日系淺若草色 🔥 */
-        :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --memo-bg: #f0f3eb; --danger-color: #ff4d4f; }
+        :root { --bg-color: #fdfbf7; --card-bg: #ffffff; --accent-color: #8c7b6c; --text-color: #4a4a4a; --light-gray: #e0e0e0; --tab-bg: #f0eadd; --memo-bg: #fff8d6; --danger-color: #ff4d4f; }
         body { margin: 0; padding: 0; font-family: "PingFang TC", "Noto Sans TC", -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; overscroll-behavior-y: none; }
         
-        #index-page { padding: 20px; display: block; padding-bottom: 100px; animation: fadeIn 0.3s; }
+        #index-page { padding: max(50px, env(safe-area-inset-top, 50px)) 20px calc(80px + env(safe-area-inset-bottom, 20px)) 20px; display: block; animation: fadeIn 0.3s; }
         .page-title { font-size: 1.8rem; margin: 10px 0 20px 0; letter-spacing: 1px; text-align: center;}
         
         .trip-card { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; transition: transform 0.1s;}
         .trip-card:active { transform: scale(0.98); }
         .trip-info { flex: 1; cursor: pointer; }
         
-        #trip-container { display: none; padding-bottom: 90px; }
-        .trip-header { padding: 20px 20px 10px 20px; display: flex; justify-content: space-between; align-items: flex-start; position: sticky; top: 0; background-color: var(--bg-color); z-index: 90; }
+        #trip-container { display: none; padding-bottom: calc(65px + env(safe-area-inset-bottom, 20px)); }
+        
+        .trip-header { padding: max(50px, env(safe-area-inset-top, 50px)) 20px 10px 20px; display: flex; justify-content: space-between; align-items: flex-start; position: sticky; top: 0; background-color: var(--bg-color); z-index: 90; }
         .header-info h1 { margin: 0; font-size: 1.4rem; }
         .back-btn { background: #fff; border: 1px solid var(--light-gray); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; color: var(--accent-color); cursor: pointer;}
         
-        nav { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--light-gray); padding-bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 100;}
+        nav { 
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+            background: rgba(255, 255, 255, 0.96); 
+            backdrop-filter: blur(10px);
+            display: flex; 
+            justify-content: space-around; 
+            padding-top: 12px; 
+            padding-bottom: calc(12px + env(safe-area-inset-bottom, 15px)); 
+            border-top: 1px solid var(--light-gray); 
+            z-index: 100;
+        }
         .nav-item { text-align: center; font-size: 0.75rem; color: #999; flex: 1; cursor: pointer; }
         .nav-item.active { color: var(--accent-color); font-weight: bold; }
         .nav-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
@@ -48,23 +60,24 @@
         .summary-text { font-size: 0.95rem; font-weight: bold; color: var(--text-color); line-height: 1.4; }
         .weather-temp { font-weight: bold; font-size: 1.1rem; color: var(--accent-color); }
 
-        /* 🔥 UI 調整：行程卡片往左移動，讓出右邊空間 🔥 */
         .timeline-card { background: var(--card-bg); border-radius: 12px; padding: 15px 12px 15px 10px; margin-bottom: 12px; border: 1px solid #f0f0f0; display: flex; gap: 10px; position: relative; }
         .drag-handle { color: #ccc; cursor: grab; display: flex; align-items: center; font-size: 1.2rem; }
         
-        /* 🔥 UI 調整：縮小時間行寬度，文字區域往左貼近 🔥 */
-        .time-col { min-width: 72px; }
-        .time-input { font-size: 0.9rem; font-weight: bold; color: var(--accent-color); border: 1px solid var(--light-gray); background: var(--tab-bg); border-radius: 6px; padding: 4px; width: 100%; text-align: center; }
-        .event-col { border-left: 2px solid var(--accent-color); padding-left: 12px; flex-grow: 1; padding-right: 15px; }
+        .time-col { min-width: 75px; margin-right: 12px; }
+        .time-input { font-size: 0.9rem; font-weight: bold; color: var(--accent-color); border: 1px solid var(--light-gray); background: var(--tab-bg); border-radius: 6px; padding: 6px 4px; width: 100%; text-align: center; box-sizing: border-box; }
+        
+        .event-col { border-left: 2px solid var(--accent-color); padding-left: 15px; flex-grow: 1; padding-right: 15px; }
         .event-title { font-size: 1rem; font-weight: bold; margin-bottom: 4px; }
         .loc-text { font-size: 0.8rem; color: #888; }
         
         .action-row { display: flex; gap: 10px; margin-top: 10px; }
         .action-btn { flex: 1; padding: 8px; border-radius: 8px; font-size: 1.2rem; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; }
-        .memo-btn { background: var(--tab-bg); color: var(--accent-color); }
+        
+        .memo-btn { background: var(--memo-bg); color: var(--accent-color); }
         .map-btn { background: #e8f0fe; color: #1a73e8; }
         
         .card { background: var(--card-bg); border-radius: 12px; padding: 18px; margin-bottom: 15px; border: 1px solid #f0f0f0; }
+        .card:empty { display: none !important; margin: 0 !important; padding: 0 !important; border: none !important; }
         
         input[type="text"], input[type="number"], input[type="date"], select { flex: 1; width: 100%; padding: 12px; border: 1px solid var(--light-gray); border-radius: 8px; font-size: 16px; box-sizing: border-box; background-color: #fff; }
         input[type="checkbox"] { width: 22px; height: 22px; margin: 0 12px 0 0; flex: none; cursor: pointer; accent-color: var(--accent-color); }
@@ -121,7 +134,7 @@
             </div>
         </div>
         <div id="itinerary-list"></div>
-        <button onclick="addItineraryEvent()" style="width:100%; padding:15px; border:1px dashed var(--accent-color); background:none; color:var(--accent-color); border-radius:12px; font-weight:bold; margin-top:10px;">+ 新增行程時段</button>
+        <button onclick="addItineraryEvent()" style="width:100%; padding:15px; border:1px dashed var(--accent-color); background:none; color:var(--accent-color); border-radius:12px; font-weight:bold; margin-top:10px; margin-bottom: 10px;">+ 新增行程時段</button>
     </div>
 
     <div id="tab-expenses" class="main-tab-content">
@@ -401,7 +414,6 @@
                 memoDisplay = 'block';
             }
             
-            // 🔥 UI 套用：使用 var(--memo-bg) 作為備忘錄背景，營造無印良品風 🔥
             container.innerHTML += `
                 <div class="timeline-card" data-idx="${idx}">
                     <div class="drag-handle">⋮⋮</div>
@@ -412,7 +424,7 @@
                         
                         <div class="action-row">
                             <button class="action-btn memo-btn" onclick="toggleMemo(${dayNum}, ${idx})">📝</button>
-                            <button class="action-btn map-btn" onclick="window.open('https://www.google.com/maps/search/?api=1&query=$${encodeURIComponent(ev.loc)}','_blank')">📍</button>
+                            <button class="action-btn map-btn" onclick="window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('${ev.loc.replace(/'/g, "\\'")}'), '_blank')">📍</button>
                         </div>
                         
                         <div id="memo-${id}" style="display: ${memoDisplay}; margin-top: 10px;">
@@ -474,6 +486,7 @@
             cont.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px dashed #eee;"><div>${e.cat} ${e.name}</div><div>${currentCurrency.symbol}${e.amt} <button onclick="delExp(${i})" style="border:none; background:none; color:#ccc; font-size:1.2rem;">×</button></div></div>`; 
         });
         document.getElementById('total-twd').innerText = Math.round(t * currentCurrency.rate).toLocaleString();
+        if(appData.expenses.length === 0) cont.style.display = 'none'; else cont.style.display = 'block';
     }
     function delExp(i) { if(confirm('刪除此帳目？')) { appData.expenses.splice(i, 1); saveData(); renderExpenses(); } }
 
@@ -484,7 +497,9 @@
     }
     
     function renderLists() {
-        document.getElementById('shopping-list-container').innerHTML = appData.shopping.map((item, i) => `<div class="list-row"><span><input type="checkbox" ${item.checked?'checked':''} onchange="toggleCheck('shopping',${i})"> ${item.text}</span><button class="del-item-btn" onclick="delListObj('shopping', ${i})">×</button></div>`).join('');
+        const sc = document.getElementById('shopping-list-container');
+        sc.innerHTML = appData.shopping.map((item, i) => `<div class="list-row"><span><input type="checkbox" ${item.checked?'checked':''} onchange="toggleCheck('shopping',${i})"> ${item.text}</span><button class="del-item-btn" onclick="delListObj('shopping', ${i})">×</button></div>`).join('');
+        if(appData.shopping.length === 0) sc.style.display = 'none'; else sc.style.display = 'block';
         
         const f = document.getElementById('food-list-container'); f.innerHTML = ''; const gf = {};
         appData.food.forEach((item, i) => { if(!gf[item.cat]) gf[item.cat] = []; item.idx = i; gf[item.cat].push(item); });
@@ -493,6 +508,7 @@
             items.forEach(item => { h += `<div class="list-row"><span><input type="checkbox" ${item.checked?'checked':''} onchange="toggleCheck('food',${item.idx})"> ${item.text}</span><button class="del-item-btn" onclick="delListObj('food', ${item.idx})">×</button></div>`; });
             f.innerHTML += h;
         }
+        if(appData.food.length === 0) f.style.display = 'none'; else f.style.display = 'block';
 
         const p = document.getElementById('packing-list-container'); p.innerHTML = ''; const gp = {};
         appData.packing.forEach((item, i) => { if(!gp[item.cat]) gp[item.cat] = []; item.idx = i; gp[item.cat].push(item); });
@@ -501,6 +517,7 @@
             items.forEach(item => { h += `<div class="list-row"><span><input type="checkbox" ${item.checked?'checked':''} onchange="toggleCheck('packing',${item.idx})"> ${item.text}</span><button class="del-item-btn" onclick="delListObj('packing', ${item.idx})">×</button></div>`; });
             p.innerHTML += h;
         }
+        if(appData.packing.length === 0) p.style.display = 'none'; else p.style.display = 'block';
     }
     
     function delListObj(type, idx) { if(confirm('確定刪除項目？')) { appData[type].splice(idx, 1); saveData(); renderLists(); } }
@@ -510,6 +527,7 @@
     
     function calcExchange() { const v = document.getElementById('usd-input').value; document.getElementById('twd-result').innerText = v ? Math.round(v * currentCurrency.rate).toLocaleString() : '0'; }
     
+    /* 🔥 修正點 3：使用標準 Google Maps 搜尋網址 🔥 */
     function saveHotelAddress() { appData.hotelAddress = document.getElementById('hotel-address').innerText; saveData(); }
     function openHotelMap() { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(appData.hotelAddress)}`, '_blank'); }
 
